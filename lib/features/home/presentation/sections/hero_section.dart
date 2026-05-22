@@ -1,14 +1,11 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
-import 'package:catlab_studios/shared/widgets/section_container.dart';
 
 /// Full-width hero banner at the top of the landing page.
 /// AI-hint: Add scroll-triggered fade-in animation (AnimationController) here.
 class HeroSection extends StatelessWidget {
   const HeroSection({super.key});
 
-  // AI-hint: Move to a constants file if more hero images are added.
   static const _heroImage = 'assets/images/hero/catwebback.png';
 
   @override
@@ -18,73 +15,45 @@ class HeroSection extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          // ── Layer 1: Background photo ──────────────────────────────────
+          // ── Layer 1: Background photo — always fully visible ───────────
           Positioned.fill(
             child: Image.asset(
               _heroImage,
               fit: BoxFit.cover,
-              // Favour the atmospheric top of the image on all screen sizes
-              alignment: Alignment.topCenter,
+              // -0.15 sits just below topCenter: moon stays top-right,
+              // cat + windowsill + laptop become visible in the lower frame.
+              alignment: const Alignment(0, -0.15),
             ),
           ),
 
-          // ── Layer 2: Dark base overlay — 40 % black ────────────────────
-          // Enough to darken without hiding the photo entirely.
+          // ── Layer 2: Minimal scrim — just enough depth (≈20 %) ─────────
           Positioned.fill(
             child: DecoratedBox(
-              decoration: BoxDecoration(color: Colors.black.withAlpha(102)),
+              decoration: BoxDecoration(color: Colors.black.withAlpha(50)),
             ),
           ),
 
-          // ── Layer 3: Navy/violet gradient tint ─────────────────────────
+          // ── Layer 3: Bottom vignette — helps button/text readability ───
+          // Fades from transparent (top 45 %) to soft black (bottom edge).
           Positioned.fill(
             child: const DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  stops: [0.0, 0.5, 1.0],
-                  colors: [
-                    Color(0x5508091A), // navy 33 % alpha
-                    Color(0x331A0E60), // violet 20 % alpha
-                    Color(0x5508091A), // navy 33 % alpha
-                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: [0.45, 1.0],
+                  colors: [Colors.transparent, Color(0xBB000000)],
                 ),
               ),
             ),
           ),
 
-          // ── Layer 4: Radial vignette — darkens all four edges ──────────
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.center,
-                  radius: 1.1,
-                  colors: [Colors.transparent, Colors.black.withAlpha(80)],
-                ),
-              ),
-            ),
-          ),
+          // ── Layer 4: Floating ambient glow — very subtle, slow animation ─
+          // AI-hint: Tune orb size/alpha here for seasonal mood changes.
+          const Positioned.fill(child: _FloatingGlowLayer()),
 
-          // ── Layer 5: Ambient glow orbs ─────────────────────────────────
-          Positioned(
-            top: -60,
-            left: -80,
-            child: _GlowOrb(size: 420, color: AppColors.primary.withAlpha(40)),
-          ),
-          Positioned(
-            bottom: -40,
-            right: -60,
-            child: _GlowOrb(size: 320, color: AppColors.accent.withAlpha(20)),
-          ),
-
-          // ── Layer 6: Content ───────────────────────────────────────────
-          SectionContainer(
-            backgroundColor: Colors.transparent,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
-            child: const _HeroCard(),
-          ),
+          // ── Layer 5: Content — text directly over the image ────────────
+          const _HeroContent(),
         ],
       ),
     );
@@ -92,7 +61,341 @@ class HeroSection extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Ambient glow orb (pure BoxDecoration, no packages needed)
+// Content column — no card, no backdrop, just typography over the image
+// ---------------------------------------------------------------------------
+class _HeroContent extends StatelessWidget {
+  const _HeroContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.sizeOf(context).width < 640;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1200),
+        child: Padding(
+          // Top is smaller than bottom → content sits higher in the frame.
+          padding: EdgeInsets.fromLTRB(
+            isNarrow ? 24 : 56,
+            isNarrow ? 52 : 76, // top
+            isNarrow ? 24 : 56,
+            isNarrow ? 108 : 172, // bottom — taller hero, more image visible
+          ),
+          child: Column(
+            crossAxisAlignment: isNarrow
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
+            children: [
+              const _GoldBadge(label: 'INDIE APP STUDIO'),
+              const SizedBox(height: 28),
+              _GlowHeadline(isNarrow: isNarrow),
+              const SizedBox(height: 18),
+              _Subline(isNarrow: isNarrow),
+              const SizedBox(height: 16),
+              _BodyText(isNarrow: isNarrow),
+              const SizedBox(height: 52),
+              _CtaRow(isNarrow: isNarrow),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gold badge — "INDIE APP STUDIO"
+// ---------------------------------------------------------------------------
+class _GoldBadge extends StatelessWidget {
+  const _GoldBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.accent.withAlpha(20),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accent.withAlpha(120)),
+      ),
+      child: const Text(
+        'INDIE APP STUDIO',
+        style: TextStyle(
+          color: AppColors.accent,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 2.4,
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main headline — warm gold with soft glow via TextStyle.shadows
+// ---------------------------------------------------------------------------
+class _GlowHeadline extends StatelessWidget {
+  const _GlowHeadline({required this.isNarrow});
+
+  final bool isNarrow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'CatLab Studios',
+      textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+      style: TextStyle(
+        fontSize: isNarrow ? 40 : 76,
+        fontWeight: FontWeight.w800,
+        color: AppColors.accent,
+        height: 1.05,
+        letterSpacing: -1.5,
+        shadows: const [
+          // Cinematic luxury glow — tight core, soft bloom, no neon.
+          Shadow(color: Color(0xCCFFDD88), blurRadius: 4),
+          Shadow(color: Color(0xAAFFBB55), blurRadius: 18),
+          Shadow(color: Color(0x66FF9900), blurRadius: 42),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Subline — warm cream-gold, lighter weight
+// ---------------------------------------------------------------------------
+class _Subline extends StatelessWidget {
+  const _Subline({required this.isNarrow});
+
+  final bool isNarrow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'Indie apps crafted with care.',
+      textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+      style: TextStyle(
+        fontSize: isNarrow ? 19 : 26,
+        fontWeight: FontWeight.w400,
+        color: const Color(0xFFFFDDA0),
+        letterSpacing: 0.2,
+        shadows: const [Shadow(color: Color(0x88FF9900), blurRadius: 16)],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Body copy — readable light text
+// ---------------------------------------------------------------------------
+class _BodyText extends StatelessWidget {
+  const _BodyText({required this.isNarrow});
+
+  final bool isNarrow;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 520),
+      child: Text(
+        'Small studio. Big ideas. '
+        'We build beautiful, useful apps that make everyday life '
+        'a little better — one pixel at a time.',
+        textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+        style: const TextStyle(
+          fontSize: 15,
+          height: 1.65,
+          color: Color(0xCCF0F0F8),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CTA row — wraps on narrow screens
+// ---------------------------------------------------------------------------
+class _CtaRow extends StatelessWidget {
+  const _CtaRow({required this.isNarrow});
+
+  final bool isNarrow;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: isNarrow ? WrapAlignment.center : WrapAlignment.start,
+      spacing: 16,
+      runSpacing: 14,
+      children: [
+        _CtaButton(
+          label: 'Explore Apps',
+          icon: Icons.apps_rounded,
+          primary: true,
+          onPressed: () {},
+        ),
+        _CtaButton(
+          label: 'Contact / Collaborate',
+          icon: Icons.mail_outline_rounded,
+          primary: false,
+          onPressed: () {},
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CTA button — hover-aware, transparent dark fill + soft gold glow on hover
+// AI-hint: Wire onPressed to go_router navigation when routing is added.
+// ---------------------------------------------------------------------------
+class _CtaButton extends StatefulWidget {
+  const _CtaButton({
+    required this.label,
+    required this.icon,
+    required this.primary,
+    required this.onPressed,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool primary;
+  final VoidCallback onPressed;
+
+  @override
+  State<_CtaButton> createState() => _CtaButtonState();
+}
+
+class _CtaButtonState extends State<_CtaButton> {
+  bool _hovered = false;
+
+  static const _shape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  );
+  static const _padding = EdgeInsets.symmetric(horizontal: 28, vertical: 16);
+  static const _textStyle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final bgAlpha = widget.primary
+        ? (_hovered ? 115 : 90)
+        : (_hovered ? 65 : 40);
+    final borderAlpha = widget.primary
+        ? (_hovered ? 220 : 255)
+        : (_hovered ? 200 : 160);
+    final glowAlpha = _hovered ? (widget.primary ? 55 : 38) : 0;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withAlpha(glowAlpha),
+              blurRadius: 22,
+              spreadRadius: -3,
+            ),
+          ],
+        ),
+        child: OutlinedButton(
+          onPressed: widget.onPressed,
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.black.withAlpha(bgAlpha),
+            foregroundColor: AppColors.accent,
+            side: BorderSide(
+              color: AppColors.accent.withAlpha(borderAlpha),
+              width: 1.0,
+            ),
+            padding: _padding,
+            textStyle: _textStyle,
+            shape: _shape,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(widget.icon, size: 18),
+              const SizedBox(width: 8),
+              Text(widget.label),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Floating ambient glow orbs — very slow, very subtle
+// ---------------------------------------------------------------------------
+class _FloatingGlowLayer extends StatefulWidget {
+  const _FloatingGlowLayer();
+
+  @override
+  State<_FloatingGlowLayer> createState() => _FloatingGlowLayerState();
+}
+
+class _FloatingGlowLayerState extends State<_FloatingGlowLayer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+  late final Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      duration: const Duration(seconds: 9),
+      vsync: this,
+    )..repeat(reverse: true);
+    _anim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (context, _) {
+        final t = _anim.value; // 0.0 → 1.0 smooth
+        return Stack(
+          children: [
+            // Violet orb — drifts gently upward
+            Positioned(
+              top: -60 + t * 14,
+              left: -80 + t * 8,
+              child: _GlowOrb(
+                size: 360,
+                color: AppColors.primary.withAlpha(28),
+              ),
+            ),
+            // Gold orb — drifts gently in the opposite phase
+            Positioned(
+              bottom: -40 - t * 10,
+              right: -60 + t * 6,
+              child: _GlowOrb(size: 260, color: AppColors.accent.withAlpha(16)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Radial glow circle — used by _FloatingGlowLayer
 // ---------------------------------------------------------------------------
 class _GlowOrb extends StatelessWidget {
   const _GlowOrb({required this.size, required this.color});
@@ -109,198 +412,6 @@ class _GlowOrb extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: RadialGradient(colors: [color, Colors.transparent]),
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Glass card holding all hero content
-// AI-hint: Replace static text with animated typewriter effect later.
-// ---------------------------------------------------------------------------
-class _HeroCard extends StatelessWidget {
-  const _HeroCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isNarrow = MediaQuery.sizeOf(context).width < 640;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withAlpha(13),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withAlpha(38)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withAlpha(70),
-                blurRadius: 48,
-                spreadRadius: -8,
-                offset: const Offset(0, 24),
-              ),
-            ],
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: isNarrow ? 24 : 48,
-            vertical: isNarrow ? 40 : 60,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Gold badge label
-              _GoldBadge(label: 'INDIE APP STUDIO'),
-              const SizedBox(height: 24),
-              // Main headline
-              Text(
-                'CatLab Studios',
-                style: theme.textTheme.displayLarge?.copyWith(
-                  fontSize: isNarrow ? 42 : 66,
-                  fontWeight: FontWeight.w800,
-                  height: 1.05,
-                  letterSpacing: -1.5,
-                ),
-              ),
-              const SizedBox(height: 14),
-              // Gold subline
-              Text(
-                'Indie apps crafted with care.',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w400,
-                  fontSize: isNarrow ? 20 : 26,
-                ),
-              ),
-              const SizedBox(height: 14),
-              // Body copy — constrained for readability
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 540),
-                child: Text(
-                  'Small studio. Big ideas. '
-                  'We build beautiful, useful apps that make everyday life '
-                  'a little better — one pixel at a time.',
-                  style: theme.textTheme.bodyLarge,
-                ),
-              ),
-              const SizedBox(height: 44),
-              // CTA buttons
-              Wrap(
-                spacing: 16,
-                runSpacing: 14,
-                children: [
-                  _CtaButton.filled(
-                    label: 'Explore Apps',
-                    icon: Icons.apps_rounded,
-                    onPressed: () {},
-                  ),
-                  _CtaButton.outlined(
-                    label: 'Contact / Collaborate',
-                    icon: Icons.mail_outline_rounded,
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Small gold pill badge
-// ---------------------------------------------------------------------------
-class _GoldBadge extends StatelessWidget {
-  const _GoldBadge({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.accent.withAlpha(25),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.accent.withAlpha(90)),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelLarge?.copyWith(
-          fontSize: 11,
-          letterSpacing: 2.2,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// CTA button — filled (gold) and outlined variants
-// ---------------------------------------------------------------------------
-class _CtaButton extends StatelessWidget {
-  const _CtaButton.filled({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  }) : _filled = true;
-
-  const _CtaButton.outlined({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-  }) : _filled = false;
-
-  final String label;
-  final IconData icon;
-  final VoidCallback onPressed;
-  final bool _filled;
-
-  static const _shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(12)),
-  );
-  static const _padding = EdgeInsets.symmetric(horizontal: 28, vertical: 16);
-  static const _textStyle = TextStyle(
-    fontSize: 15,
-    fontWeight: FontWeight.w700,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final content = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [Icon(icon, size: 18), const SizedBox(width: 8), Text(label)],
-    );
-
-    if (_filled) {
-      return FilledButton(
-        onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          foregroundColor: AppColors.background,
-          padding: _padding,
-          textStyle: _textStyle,
-          shape: _shape,
-        ),
-        child: content,
-      );
-    }
-
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textPrimary,
-        side: const BorderSide(color: AppColors.accent, width: 1.5),
-        padding: _padding,
-        textStyle: _textStyle,
-        shape: _shape,
-      ),
-      child: content,
     );
   }
 }
