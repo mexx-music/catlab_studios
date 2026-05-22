@@ -8,39 +8,78 @@ import 'package:catlab_studios/shared/widgets/section_container.dart';
 class HeroSection extends StatelessWidget {
   const HeroSection({super.key});
 
+  // AI-hint: Move to a constants file if more hero images are added.
+  static const _heroImage = 'assets/images/hero/catwebback.png';
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: [0.0, 0.4, 0.75, 1.0],
-          colors: [
-            Color(0xFF08091A), // deepest navy
-            Color(0xFF1A0E60), // deep violet
-            Color(0xFF2B0E80), // rich purple
-            Color(0xFF08091A), // back to navy
-          ],
-        ),
-      ),
       child: Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          // Ambient violet glow — top-left
+          // ── Layer 1: Background photo ──────────────────────────────────
+          Positioned.fill(
+            child: Image.asset(
+              _heroImage,
+              fit: BoxFit.cover,
+              // Favour the atmospheric top of the image on all screen sizes
+              alignment: Alignment.topCenter,
+            ),
+          ),
+
+          // ── Layer 2: Dark base overlay — 40 % black ────────────────────
+          // Enough to darken without hiding the photo entirely.
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: Colors.black.withAlpha(102)),
+            ),
+          ),
+
+          // ── Layer 3: Navy/violet gradient tint ─────────────────────────
+          Positioned.fill(
+            child: const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  stops: [0.0, 0.5, 1.0],
+                  colors: [
+                    Color(0x5508091A), // navy 33 % alpha
+                    Color(0x331A0E60), // violet 20 % alpha
+                    Color(0x5508091A), // navy 33 % alpha
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Layer 4: Radial vignette — darkens all four edges ──────────
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: Alignment.center,
+                  radius: 1.1,
+                  colors: [Colors.transparent, Colors.black.withAlpha(80)],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Layer 5: Ambient glow orbs ─────────────────────────────────
           Positioned(
             top: -60,
             left: -80,
-            child: _GlowOrb(size: 420, color: AppColors.primary.withAlpha(55)),
+            child: _GlowOrb(size: 420, color: AppColors.primary.withAlpha(40)),
           ),
-          // Ambient gold glow — bottom-right
           Positioned(
             bottom: -40,
             right: -60,
-            child: _GlowOrb(size: 320, color: AppColors.accent.withAlpha(28)),
+            child: _GlowOrb(size: 320, color: AppColors.accent.withAlpha(20)),
           ),
-          // Main content
+
+          // ── Layer 6: Content ───────────────────────────────────────────
           SectionContainer(
             backgroundColor: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
