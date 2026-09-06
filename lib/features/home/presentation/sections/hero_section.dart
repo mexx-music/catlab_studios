@@ -4,7 +4,17 @@ import 'package:catlab_studios/core/constants/app_colors.dart';
 /// Full-width hero banner at the top of the landing page.
 /// AI-hint: Add scroll-triggered fade-in animation (AnimationController) here.
 class HeroSection extends StatelessWidget {
-  const HeroSection({super.key});
+  const HeroSection({
+    super.key,
+    required this.onExploreApps,
+    required this.onWhatWeBuild,
+  });
+
+  /// Scrolls the page to the portfolio section.
+  final VoidCallback onExploreApps;
+
+  /// Scrolls the page to the capabilities section.
+  final VoidCallback onWhatWeBuild;
 
   static const _heroImage = 'assets/images/hero/catwebback.png';
 
@@ -53,7 +63,10 @@ class HeroSection extends StatelessWidget {
           const Positioned.fill(child: _FloatingGlowLayer()),
 
           // ── Layer 5: Content — text directly over the image ────────────
-          const _HeroContent(),
+          _HeroContent(
+            onExploreApps: onExploreApps,
+            onWhatWeBuild: onWhatWeBuild,
+          ),
         ],
       ),
     );
@@ -64,7 +77,13 @@ class HeroSection extends StatelessWidget {
 // Content column — no card, no backdrop, just typography over the image
 // ---------------------------------------------------------------------------
 class _HeroContent extends StatelessWidget {
-  const _HeroContent();
+  const _HeroContent({
+    required this.onExploreApps,
+    required this.onWhatWeBuild,
+  });
+
+  final VoidCallback onExploreApps;
+  final VoidCallback onWhatWeBuild;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +105,7 @@ class _HeroContent extends StatelessWidget {
                 ? CrossAxisAlignment.center
                 : CrossAxisAlignment.start,
             children: [
-              const _GoldBadge(label: 'INDIE APP STUDIO'),
+              const _GoldBadge(label: 'INDEPENDENT SOFTWARE STUDIO'),
               const SizedBox(height: 28),
               _GlowHeadline(isNarrow: isNarrow),
               const SizedBox(height: 18),
@@ -94,7 +113,11 @@ class _HeroContent extends StatelessWidget {
               const SizedBox(height: 16),
               _BodyText(isNarrow: isNarrow),
               const SizedBox(height: 52),
-              _CtaRow(isNarrow: isNarrow),
+              _CtaRow(
+                isNarrow: isNarrow,
+                onExploreApps: onExploreApps,
+                onWhatWeBuild: onWhatWeBuild,
+              ),
             ],
           ),
         ),
@@ -104,7 +127,7 @@ class _HeroContent extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Gold badge — "INDIE APP STUDIO"
+// Gold badge — studio positioning line
 // ---------------------------------------------------------------------------
 class _GoldBadge extends StatelessWidget {
   const _GoldBadge({required this.label});
@@ -120,9 +143,9 @@ class _GoldBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.accent.withAlpha(120)),
       ),
-      child: const Text(
-        'INDIE APP STUDIO',
-        style: TextStyle(
+      child: Text(
+        label,
+        style: const TextStyle(
           color: AppColors.accent,
           fontSize: 11,
           fontWeight: FontWeight.w600,
@@ -174,7 +197,7 @@ class _Subline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Indie apps crafted with care.',
+      'Practical, creative and AI-powered software.',
       textAlign: isNarrow ? TextAlign.center : TextAlign.start,
       style: TextStyle(
         fontSize: isNarrow ? 19 : 26,
@@ -198,11 +221,11 @@ class _BodyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 520),
+      constraints: const BoxConstraints(maxWidth: 560),
       child: Text(
-        'Small studio. Big ideas. '
-        'We build beautiful, useful apps that make everyday life '
-        'a little better — one pixel at a time.',
+        'CatLab Studios is an independent software studio building '
+        'applications across mobile, web and desktop — from AI platforms and '
+        'business tools to health, logistics and games.',
         textAlign: isNarrow ? TextAlign.center : TextAlign.start,
         style: const TextStyle(
           fontSize: 15,
@@ -218,9 +241,15 @@ class _BodyText extends StatelessWidget {
 // CTA row — wraps on narrow screens
 // ---------------------------------------------------------------------------
 class _CtaRow extends StatelessWidget {
-  const _CtaRow({required this.isNarrow});
+  const _CtaRow({
+    required this.isNarrow,
+    required this.onExploreApps,
+    required this.onWhatWeBuild,
+  });
 
   final bool isNarrow;
+  final VoidCallback onExploreApps;
+  final VoidCallback onWhatWeBuild;
 
   @override
   Widget build(BuildContext context) {
@@ -233,13 +262,15 @@ class _CtaRow extends StatelessWidget {
           label: 'Explore Apps',
           icon: Icons.apps_rounded,
           primary: true,
-          onPressed: () {},
+          compact: isNarrow,
+          onPressed: onExploreApps,
         ),
         _CtaButton(
-          label: 'Contact / Collaborate',
-          icon: Icons.mail_outline_rounded,
+          label: 'What We Build',
+          icon: Icons.layers_outlined,
           primary: false,
-          onPressed: () {},
+          compact: isNarrow,
+          onPressed: onWhatWeBuild,
         ),
       ],
     );
@@ -255,12 +286,18 @@ class _CtaButton extends StatefulWidget {
     required this.label,
     required this.icon,
     required this.primary,
+    required this.compact,
     required this.onPressed,
   });
 
   final String label;
   final IconData icon;
   final bool primary;
+
+  /// Tightens padding on phones — at 320 px the roomy desktop padding pushes
+  /// the label past the edge of the screen.
+  final bool compact;
+
   final VoidCallback onPressed;
 
   @override
@@ -274,6 +311,8 @@ class _CtaButtonState extends State<_CtaButton> {
     borderRadius: BorderRadius.all(Radius.circular(12)),
   );
   static const _padding = EdgeInsets.symmetric(horizontal: 28, vertical: 16);
+  static const _compactPadding =
+      EdgeInsets.symmetric(horizontal: 18, vertical: 14);
   static const _textStyle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w700,
@@ -315,7 +354,7 @@ class _CtaButtonState extends State<_CtaButton> {
               color: AppColors.accent.withAlpha(borderAlpha),
               width: 1.0,
             ),
-            padding: _padding,
+            padding: widget.compact ? _compactPadding : _padding,
             textStyle: _textStyle,
             shape: _shape,
           ),
@@ -324,7 +363,13 @@ class _CtaButtonState extends State<_CtaButton> {
             children: [
               Icon(widget.icon, size: 18),
               const SizedBox(width: 8),
-              Text(widget.label),
+              Flexible(
+                child: Text(
+                  widget.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ),

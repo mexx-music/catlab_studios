@@ -21,6 +21,13 @@ abstract final class AppColors {
   static const Color textSecondary = Color(0xFFAAABC4);
   static const Color textMuted = Color(0xFF6B6D88);
 
+  // Status — muted, desaturated so the app icons stay the loudest thing
+  static const Color statusAvailable = Color(0xFF4ED8A0);
+  static const Color statusAdvanced = Color(0xFF6FA8FF);
+  static const Color statusInDevelopment = Color(0xFFFFBB55);
+  static const Color statusPrototype = Color(0xFFB98CF0);
+  static const Color statusConcept = Color(0xFF8A8CA8);
+
   // Utility
   static const Color divider = Color(0xFF2A2C45);
   static const Color cardBorder = Color(0xFF2E3155);
