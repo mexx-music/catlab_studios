@@ -18,19 +18,28 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="CatLab Studios is an independent software studio building practical, creative and AI-powered applications across mobile, web and desktop.">
+  <meta name="theme-color" content="#0D0F1E">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="catlab_studios">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="CatLab Studios">
+  <!--
+    iOS caches the home-screen icon at the moment the site is added and never
+    refreshes it, so this points at a NEW filename rather than the old
+    icons/Icon-192.png. A new path is the only reliable way to invalidate an
+    already-cached home-screen icon; existing entries still need re-adding.
+    Declared at 180x180, the size iOS actually wants for the home screen.
+  -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <!-- Favicon — ?v=2 busts the cached Flutter default at the same filename -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png?v=2"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png?v=2"/>
 
-  <title>catlab_studios</title>
-  <link rel="manifest" href="manifest.json">
+  <title>CatLab Studios</title>
+  <link rel="manifest" href="manifest.json?v=2">
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
