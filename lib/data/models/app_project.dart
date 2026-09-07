@@ -23,6 +23,7 @@ class AppProject {
     required this.status,
     this.iconAsset,
     this.platforms = const [],
+    this.platformStages = const {},
     this.links = const [],
     this.highlights = const [],
     this.featured = false,
@@ -53,6 +54,11 @@ class AppProject {
 
   final AppStatus status;
   final List<AppPlatform> platforms;
+
+  /// Per-platform release stage, for projects that are further along on one
+  /// platform than another (live on iOS, closed beta on Android). Platforms
+  /// absent from this map inherit the project's overall [status].
+  final Map<AppPlatform, PlatformStage> platformStages;
   final List<AppLink> links;
 
   /// Short factual bullets for the detail sheet.
@@ -63,6 +69,11 @@ class AppProject {
 
   bool get hasIconAsset => iconAsset != null;
   bool get hasLinks => links.isNotEmpty;
+
+  /// True when any platform is in closed testing, which is what puts the
+  /// beta-access action on the detail sheet.
+  bool get hasBetaPlatform =>
+      platformStages.values.contains(PlatformStage.beta);
 
   /// The link a card's primary button should follow, if any.
   /// Prefers a store listing over a web build.

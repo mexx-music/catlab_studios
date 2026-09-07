@@ -146,7 +146,10 @@ class _AppCardState extends State<AppCard> {
                     Row(
                       children: [
                         Expanded(
-                          child: PlatformChips(platforms: project.platforms),
+                          child: PlatformChips(
+                            platforms: project.platforms,
+                            stages: project.platformStages,
+                          ),
                         ),
                         if (project.hasLinks) ...[
                           const SizedBox(width: 8),

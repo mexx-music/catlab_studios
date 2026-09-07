@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:catlab_studios/app.dart';
+import 'package:catlab_studios/core/config/beta_access_config.dart';
 import 'package:catlab_studios/data/models/app_category.dart';
+import 'package:catlab_studios/data/models/app_link.dart';
+import 'package:catlab_studios/data/models/app_platform.dart';
+import 'package:catlab_studios/data/models/app_project.dart';
+import 'package:catlab_studios/data/models/app_status.dart';
+import 'package:catlab_studios/shared/widgets/beta_access_dialog.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/shared/widgets/app_card.dart';
 import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
@@ -68,6 +74,21 @@ void main() {
   group('detail sheet', () {
     // Opens the sheet for the project whose content is longest, since that is
     // the one most likely to overflow.
+    // AppDetailSheet always lives inside _SheetShell's scroll view; mirror
+    // that here so a tall sheet is not a false overflow.
+    Future<void> pumpDetail(WidgetTester tester, AppProject project) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AppDetailSheet(project: project),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+    }
+
     // Note: the hero runs a looping ambient animation, so `pumpAndSettle`
     // would never settle — pump fixed durations instead.
     Future<void> openBusiest(WidgetTester tester, Size size) async {
@@ -98,9 +119,132 @@ void main() {
     testWidgets('says so plainly when a project has no public link', (
       tester,
     ) async {
-      await openBusiest(tester, const Size(1440, 2400));
-      // The first card is HB Cure, which has no verified store link yet.
+      // Medical ProCat is a concept with nothing public to link to.
+      final concept = AppProjectsRepository.all
+          .firstWhere((a) => a.id == 'medical_procat');
+      expect(concept.hasLinks, isFalse);
+
+      await pumpDetail(tester, concept);
+
       expect(find.textContaining('Not publicly available yet'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('HB Cure shows all three verified destinations', (
+      tester,
+    ) async {
+      final hbCure =
+          AppProjectsRepository.all.firstWhere((a) => a.id == 'hb_cure');
+      await pumpDetail(tester, hbCure);
+
+      expect(find.text('Download on the App Store'), findsOneWidget);
+      expect(find.text('Get it on Google Play'), findsOneWidget);
+      expect(find.text('Learn about CureClip & CureBase'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Feline Alarm separates iOS from the Android beta', (
+      tester,
+    ) async {
+      final felineAlarm =
+          AppProjectsRepository.all.firstWhere((a) => a.id == 'feline_alarm');
+      await pumpDetail(tester, felineAlarm);
+
+      expect(find.text('Beta · Closed Test'), findsOneWidget);
+      expect(find.text('Available'), findsWidgets);
+      expect(find.text('Join Android Beta'), findsOneWidget);
+      expect(find.text('Download on the App Store'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('release information', () {
+    AppProject byId(String id) =>
+        AppProjectsRepository.all.firstWhere((a) => a.id == id);
+
+    test('HB Cure offers App Store, Google Play and the hardware site', () {
+      final hbCure = byId('hb_cure');
+      expect(hbCure.status, AppStatus.available);
+      expect(
+        hbCure.links.map((l) => l.kind),
+        containsAll([
+          AppLinkKind.appStore,
+          AppLinkKind.playStore,
+          AppLinkKind.external,
+        ]),
+      );
+      // The store listing must win the card's single button slot.
+      expect(hbCure.primaryLink!.kind, AppLinkKind.appStore);
+    });
+
+    test('Feline Alarm is available on iOS and in beta on Android', () {
+      final felineAlarm = byId('feline_alarm');
+      expect(felineAlarm.status, AppStatus.available);
+      expect(
+        felineAlarm.platformStages[AppPlatform.ios],
+        PlatformStage.available,
+      );
+      expect(
+        felineAlarm.platformStages[AppPlatform.android],
+        PlatformStage.beta,
+      );
+      expect(felineAlarm.hasBetaPlatform, isTrue);
+    });
+
+    test('no Play link is claimed while Android is in closed testing', () {
+      final felineAlarm = byId('feline_alarm');
+      expect(
+        felineAlarm.links.any((l) => l.kind == AppLinkKind.playStore),
+        isFalse,
+        reason: 'a closed test has no public Play listing to link to',
+      );
+    });
+
+    test('only projects with differing platforms declare stages', () {
+      for (final app in AppProjectsRepository.all) {
+        if (app.platformStages.isEmpty) continue;
+        for (final platform in app.platformStages.keys) {
+          expect(
+            app.platforms,
+            contains(platform),
+            reason: '${app.name} stages a platform it does not list',
+          );
+        }
+      }
+    });
+  });
+
+  group('android beta flow', () {
+    testWidgets('the request form cannot be submitted while unconfigured', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: BetaAccessDialog(appName: 'Feline Alarm')),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Join the Android Beta'), findsOneWidget);
+      expect(find.textContaining('Google account email address'), findsOneWidget);
+
+      expect(find.text('Request Beta Access'), findsOneWidget);
+
+      // Guards the promise in BetaAccessConfig: with no destination set, a
+      // submit must not report success. Typing a valid address and pressing
+      // the button has to leave the form exactly where it was.
+      if (!BetaAccessConfig.isConfigured) {
+        expect(find.textContaining('not open yet'), findsOneWidget);
+
+        await tester.enterText(find.byType(TextFormField), 'tester@gmail.com');
+        await tester.pump();
+        await tester.tap(find.text('Request Beta Access'), warnIfMissed: false);
+        await tester.pump(const Duration(milliseconds: 400));
+
+        expect(find.text('Almost there'), findsNothing);
+        expect(find.text('Request Beta Access'), findsOneWidget);
+      }
+      expect(tester.takeException(), isNull);
     });
   });
 

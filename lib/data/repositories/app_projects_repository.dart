@@ -22,8 +22,9 @@ abstract final class AppProjectsRepository {
 
   static const List<AppProject> all = [
     // ── HB Cure ────────────────────────────────────────────────────────────
-    // TODO(links): No App Store / Google Play URL is recorded anywhere in the
-    // hbcure repository. Add both here once the listings are known.
+    // Store listings verified 2026-09-07: Apple returns trackName "HB Cure"
+    // (bundle com.mexxpichler.hbcure), and the Play listing for
+    // com.catlabstudios.hbcure resolves where a bogus package 404s.
     AppProject(
       id: 'hb_cure',
       name: 'HB Cure',
@@ -39,6 +40,25 @@ abstract final class AppProjectsRepository {
       categoryLabel: 'Health · Device Control',
       status: AppStatus.available,
       platforms: [AppPlatform.ios, AppPlatform.android],
+      links: [
+        AppLink(
+          kind: AppLinkKind.appStore,
+          url: 'https://apps.apple.com/app/hb-cure/id6772611342',
+        ),
+        AppLink(
+          kind: AppLinkKind.playStore,
+          url:
+              'https://play.google.com/store/apps/details?id=com.catlabstudios.hbcure',
+        ),
+        // The hardware this app drives is a Healing & Balance product. Linked
+        // as further reading only — CatLab Studios builds the software.
+        AppLink(
+          kind: AppLinkKind.external,
+          url: 'https://www.healing-balance.com/',
+          label: 'Healing & Balance',
+          longLabel: 'Learn about CureClip & CureBase',
+        ),
+      ],
       highlights: [
         'BLE connection to CureBase / CureClip hardware',
         'Program library with frequency sequences',
@@ -210,10 +230,13 @@ abstract final class AppProjectsRepository {
     ),
 
     // ── Feline Alarm ───────────────────────────────────────────────────────
-    // TODO(links): cat_alarm ships a production bundle id (com.mexx.catalarm),
-    // version 1.0.10+93 and a Play upload keystore, but no store URL is
-    // recorded in the repository. Add the listings here once known, then the
-    // status can move to Available.
+    // Verified 2026-09-07 through Apple's lookup API: bundle
+    // com.mexxcatlab.catalarm — which matches cat_alarm's iOS project exactly
+    // — resolves to trackName "Feline Alarm", id 6767463395.
+    //
+    // Android is in Google Play closed testing, so it has no public listing
+    // (com.mexx.catalarm returns 404) and deliberately gets no store link.
+    // Hence the per-platform stages below rather than one blanket status.
     AppProject(
       id: 'feline_alarm',
       name: 'Feline Alarm',
@@ -225,9 +248,17 @@ abstract final class AppProjectsRepository {
       iconAsset: '$_iconPath/feline_alarm.png',
       category: AppCategory.lifestyle,
       categoryLabel: 'Utility · Lifestyle',
-      status: AppStatus.advanced,
+      status: AppStatus.available,
       platforms: [AppPlatform.ios, AppPlatform.android, AppPlatform.web],
+      platformStages: {
+        AppPlatform.ios: PlatformStage.available,
+        AppPlatform.android: PlatformStage.beta,
+      },
       links: [
+        AppLink(
+          kind: AppLinkKind.appStore,
+          url: 'https://apps.apple.com/app/feline-alarm/id6767463395',
+        ),
         AppLink(
           kind: AppLinkKind.web,
           url: 'https://mexx-music.github.io/cat-alarm-web/',

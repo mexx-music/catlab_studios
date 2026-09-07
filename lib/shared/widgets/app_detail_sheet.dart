@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
+import 'package:catlab_studios/shared/widgets/beta_access_dialog.dart';
 import 'package:catlab_studios/shared/widgets/app_icon_tile.dart';
 import 'package:catlab_studios/shared/widgets/link_button.dart';
 import 'package:catlab_studios/shared/widgets/platform_chips.dart';
@@ -157,7 +158,11 @@ class AppDetailSheet extends StatelessWidget {
           const SizedBox(height: 22),
           const _SectionLabel('Platforms'),
           const SizedBox(height: 12),
-          PlatformChips(platforms: project.platforms, showLabels: true),
+          PlatformChips(
+            platforms: project.platforms,
+            stages: project.platformStages,
+            showLabels: true,
+          ),
         ],
 
         // ── Links ────────────────────────────────────────────────────────
@@ -168,7 +173,15 @@ class AppDetailSheet extends StatelessWidget {
             runSpacing: 10,
             children: [
               for (var i = 0; i < project.links.length; i++)
-                LinkButton(link: project.links[i], filled: i == 0),
+                LinkButton(
+                  link: project.links[i],
+                  filled: i == 0,
+                  useLongLabel: true,
+                ),
+              // A closed test has no public store page to link to, so the
+              // beta action stands in for the missing Play button.
+              if (project.hasBetaPlatform)
+                _BetaAccessButton(appName: project.name),
             ],
           )
         else
@@ -191,6 +204,36 @@ class AppDetailSheet extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Opens the Android closed-test request flow
+// ---------------------------------------------------------------------------
+class _BetaAccessButton extends StatelessWidget {
+  const _BetaAccessButton({required this.appName});
+
+  final String appName;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => BetaAccessDialog.show(context, appName),
+      icon: const Icon(Icons.android_rounded, size: 16),
+      label: const Text('Join Android Beta'),
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.statusInDevelopment,
+        backgroundColor: AppColors.statusInDevelopment.withAlpha(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: AppColors.statusInDevelopment.withAlpha(70),
+          ),
+        ),
+      ),
     );
   }
 }
