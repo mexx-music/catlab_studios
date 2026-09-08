@@ -1,7 +1,14 @@
 # Builds the Flutter web app and deploys it to GitHub Pages.
-# AI-hint: Update --base-href below to match your GitHub repo name.
-#   Format: /<repo-name>/
-#   Leave as / only if you use a custom domain (CNAME).
+#
+# The site is served from the apex custom domain https://catlabstudios.com,
+# so the app lives at the root and --base-href must stay "/". It is NOT
+# "/catlab_studios/" any more: that was for the old project-path URL
+# https://mexx-music.github.io/catlab_studios/, and reintroducing it would
+# make every asset request 404 on the custom domain.
+#
+# The domain itself is pinned two ways: the Pages setting on this repo, and
+# web/CNAME, which is copied into build/web and ships inside every artifact
+# so a deployment can never silently drop the custom domain.
 
 name: Deploy to GitHub Pages
 
@@ -50,9 +57,19 @@ jobs:
         run: |
           flutter build web \
             --release \
-            --base-href /catlab_studios/
-        # AI-hint: Change /catlab_studios/ to /<your-github-repo-name>/
-        # If you point a custom domain at Pages, use --base-href / instead.
+            --base-href /
+
+      # Cheap guard against the two ways this deployment can silently break:
+      # a stale project-path base-href, or an artifact that lost the domain.
+      - name: Verify root base-href and CNAME
+        run: |
+          grep -q '<base href="/">' build/web/index.html \
+            || { echo "::error::base-href is not '/' - assets would 404 on catlabstudios.com"; exit 1; }
+          ! grep -rq '/catlab_studios/' build/web/index.html build/web/manifest.json \
+            || { echo "::error::build still references the old /catlab_studios/ path"; exit 1; }
+          [ "$(cat build/web/CNAME)" = "catlabstudios.com" ] \
+            || { echo "::error::CNAME missing from the artifact - the custom domain would be dropped"; exit 1; }
+          echo "base-href, path and CNAME all correct"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
