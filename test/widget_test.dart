@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:catlab_studios/app.dart';
 import 'package:catlab_studios/core/config/beta_access_config.dart';
+import 'package:catlab_studios/core/utils/link_launcher.dart';
 import 'package:catlab_studios/data/models/app_category.dart';
 import 'package:catlab_studios/data/models/app_link.dart';
 import 'package:catlab_studios/data/models/app_platform.dart';
@@ -219,7 +220,87 @@ void main() {
   });
 
   group('android beta flow', () {
-    testWidgets('the request form cannot be submitted while unconfigured', (
+    test('requests go to the studio address on our own domain', () {
+      expect(BetaAccessConfig.isConfigured, isTrue,
+          reason: 'beta sign-up should be live');
+      expect(BetaAccessConfig.requestEmail, 'beta@catlabstudios.com');
+      expect(BetaAccessConfig.requestEmail, endsWith('@catlabstudios.com'),
+          reason: 'never route beta requests to a personal mailbox');
+    });
+
+    test('no personal mailbox is compiled into the public build', () {
+      // Allowed: our own studio domains (the migrated privacy pages carry a
+      // support address on the older one, and that legal text must not be
+      // edited) plus the placeholder shown inside the input field.
+      const allowedDomains = ['@catlabstudios.com', '@mexxcatlabstudios.com'];
+      const allowedPlaceholder = 'you@gmail.com';
+      final offenders = <String>[];
+
+      for (final dir in ['lib', 'web']) {
+        for (final entity in Directory(dir).listSync(recursive: true)) {
+          if (entity is! File) continue;
+          if (!(entity.path.endsWith('.dart') ||
+              entity.path.endsWith('.html') ||
+              entity.path.endsWith('.json'))) {
+            continue;
+          }
+          final matches = RegExp(r'[\w.+-]+@[\w.-]+\.\w+')
+              .allMatches(entity.readAsStringSync());
+          for (final match in matches) {
+            final address = match.group(0)!;
+            if (allowedDomains.any(address.endsWith)) continue;
+            if (address == allowedPlaceholder) continue;
+            offenders.add('${entity.path}: $address');
+          }
+        }
+      }
+
+      expect(offenders, isEmpty,
+          reason: 'unexpected address in a public build:\n'
+              '${offenders.join('\n')}');
+    });
+
+    testWidgets('a submitted request carries the tester Google account', (
+      tester,
+    ) async {
+      // Capture the mailto the dialog hands to the launcher instead of
+      // actually opening a mail client.
+      final launched = <String>[];
+      LinkLauncher.debugOverrideOpen = (url) async => launched.add(url);
+      addTearDown(() => LinkLauncher.debugOverrideOpen = null);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: BetaAccessDialog(appName: 'Feline Alarm')),
+        ),
+      );
+      await tester.pump();
+
+      await tester.enterText(find.byType(TextFormField), 'tester@gmail.com');
+      await tester.pump();
+      await tester.tap(find.text('Request Beta Access'), warnIfMissed: false);
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(launched, hasLength(1));
+      final uri = Uri.parse(launched.single);
+      expect(uri.scheme, 'mailto');
+      expect(uri.path, 'beta@catlabstudios.com');
+
+      final query = Uri.decodeComponent(uri.query);
+      expect(query, contains('Feline Alarm'));
+      expect(query, contains('Android closed test'));
+      expect(query, contains('tester@gmail.com'));
+
+      // A mailto query is not form data: "+" would arrive as a literal plus,
+      // so spaces must be percent-encoded.
+      expect(uri.query.contains('+'), isFalse,
+          reason: 'spaces must be %20, not "+", in a mailto URL');
+
+      // The confirmation state only appears once the request actually went out.
+      expect(find.text('Almost there'), findsOneWidget);
+    });
+
+    testWidgets('the form renders and is submittable now that it is live', (
       tester,
     ) async {
       await tester.pumpWidget(

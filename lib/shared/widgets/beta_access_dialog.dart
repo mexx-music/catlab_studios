@@ -58,19 +58,28 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    final address = BetaAccessConfig.requestEmail;
-    if (address == null) return;
+    if (!BetaAccessConfig.isConfigured) return;
+    const address = BetaAccessConfig.requestEmail;
 
     final entered = _controller.text.trim();
-    final uri = Uri(
-      scheme: 'mailto',
-      path: address,
-      queryParameters: {
-        'subject': '${widget.appName} — Android beta access request',
-        'body':
-            'Please add this Google account to the ${widget.appName} '
-            'closed test:\n\n$entered\n',
-      },
+
+    final subject = '${widget.appName} — Android beta access request';
+    final body =
+        '${widget.appName} — Android closed test (Google Play)\n\n'
+        'Google account to add: $entered\n\n'
+        'Sent from catlabstudios.com\n';
+
+    // Built by hand rather than with Uri(queryParameters: ...), which
+    // form-encodes spaces as "+". A mailto query is not form data — RFC 6068
+    // clients render that plus literally, so the subject would arrive as
+    // "Feline+Alarm+—+Android...". encodeComponent gives %20 instead.
+    //
+    // Only the query is encoded: percent-encoding the recipient would yield
+    // "beta%40catlabstudios.com", which several mail clients mishandle.
+    final uri = Uri.parse(
+      'mailto:$address'
+      '?subject=${Uri.encodeComponent(subject)}'
+      '&body=${Uri.encodeComponent(body)}',
     );
 
     await LinkLauncher.open(uri.toString());
