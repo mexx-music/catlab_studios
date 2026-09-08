@@ -118,6 +118,41 @@ class AppDetailSheet extends StatelessWidget {
           ),
         ),
 
+        // ── Connected product, when one belongs to this app ──────────────
+        if (project.companionProductNote != null) ...[
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withAlpha(12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.accent.withAlpha(50)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.all_inclusive_rounded,
+                  size: 16,
+                  color: AppColors.accent,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    project.companionProductNote!,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
         // ── Highlights ───────────────────────────────────────────────────
         if (project.highlights.isNotEmpty) ...[
           const SizedBox(height: 28),

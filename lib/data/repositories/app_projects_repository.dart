@@ -215,12 +215,20 @@ abstract final class AppProjectsRepository {
           kind: AppLinkKind.appStore,
           url: 'https://apps.apple.com/us/app/purrlove/id6771538849',
         ),
+        // Same app, different store name: the Play listing is published as
+        // "Cat Purr Relax". Saying so on the button avoids looking like a
+        // wrong link without splitting one app into two entries.
         AppLink(
           kind: AppLinkKind.playStore,
           url:
               'https://play.google.com/store/apps/details?id=com.mexx.schnurr_app',
+          label: 'Google Play',
+          longLabel: 'Get it on Google Play — listed as Cat Purr Relax',
         ),
       ],
+      companionProductNote:
+          'PurrLove is the app in the SchnurrPurr set — a plush pillow with a '
+          'removable purr module.',
       highlights: [
         'Several cats, each with its own purr recording',
         'Sleep timer from 10 to 90 minutes, or endless',

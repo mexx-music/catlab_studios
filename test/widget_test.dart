@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,6 +12,8 @@ import 'package:catlab_studios/data/models/app_project.dart';
 import 'package:catlab_studios/data/models/app_status.dart';
 import 'package:catlab_studios/shared/widgets/beta_access_dialog.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
+import 'package:catlab_studios/data/repositories/connected_products_repository.dart';
+import 'package:catlab_studios/features/home/presentation/sections/connected_products_section.dart';
 import 'package:catlab_studios/shared/widgets/app_card.dart';
 import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
@@ -245,6 +249,85 @@ void main() {
         expect(find.text('Request Beta Access'), findsOneWidget);
       }
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('connected products', () {
+    test('SchnurrPurr is a product, not a fifteenth app', () {
+      expect(
+        AppProjectsRepository.all.any(
+          (a) => a.name.toLowerCase().contains('schnurrpurr'),
+        ),
+        isFalse,
+        reason: 'a pillow has no status, platform or category — it belongs in '
+            'the connected-products section',
+      );
+      expect(ConnectedProductsRepository.all, isNotEmpty);
+    });
+
+    test('the product links to its real site and to PurrLove', () {
+      final product = ConnectedProductsRepository.all
+          .firstWhere((p) => p.id == 'schnurrpurr');
+      expect(product.links.single.url, 'https://schnurrpurr.com');
+      expect(product.companionAppId, 'purrlove');
+      // The companion id must resolve, or the cross-link silently does nothing.
+      expect(
+        AppProjectsRepository.all.any((a) => a.id == product.companionAppId),
+        isTrue,
+      );
+    });
+
+    test('no product claims app-controlled hardware', () {
+      // PurrLove has no BLE dependency, no Bluetooth permission, and its
+      // entitlement service documents module detection as unimplemented
+      // "Phase 2" — so the site must not say the app connects to the module.
+      for (final product in ConnectedProductsRepository.all) {
+        final copy = '${product.description} ${product.highlights.join(' ')}'
+            .toLowerCase();
+        for (final claim in ['bluetooth', 'connect', 'control', 'pair']) {
+          expect(copy.contains(claim), isFalse,
+              reason: '${product.name} copy claims "$claim"');
+        }
+      }
+    });
+
+    test('product images are real assets under products/', () {
+      for (final product in ConnectedProductsRepository.all) {
+        expect(product.imageAsset, startsWith('assets/images/products/'));
+        expect(File(product.imageAsset).existsSync(), isTrue,
+            reason: '${product.imageAsset} is missing');
+      }
+    });
+
+    testWidgets('the section renders on the landing page', (tester) async {
+      await _pumpSite(tester);
+      expect(find.byType(ConnectedProductsSection), findsOneWidget);
+      expect(find.text('SchnurrPurr'), findsOneWidget);
+      expect(find.text('Discover SchnurrPurr'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('PurrLove and Cat Purr Relax are one app', () {
+    test('the Play listing name is stated, not split into a second entry', () {
+      final purrlove =
+          AppProjectsRepository.all.firstWhere((a) => a.id == 'purrlove');
+      final play = purrlove.links
+          .firstWhere((l) => l.kind == AppLinkKind.playStore);
+      expect(play.displayLongLabel, contains('Cat Purr Relax'));
+      expect(
+        AppProjectsRepository.all
+            .where((a) => a.name.toLowerCase().contains('cat purr relax')),
+        isEmpty,
+        reason: 'the same app must not appear twice',
+      );
+    });
+
+    test('PurrLove names the SchnurrPurr set', () {
+      final purrlove =
+          AppProjectsRepository.all.firstWhere((a) => a.id == 'purrlove');
+      expect(purrlove.companionProductNote, isNotNull);
+      expect(purrlove.companionProductNote, contains('SchnurrPurr'));
     });
   });
 

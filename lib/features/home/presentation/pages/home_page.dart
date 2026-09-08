@@ -3,6 +3,7 @@ import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/features/home/presentation/sections/about_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/capabilities_section.dart';
+import 'package:catlab_studios/features/home/presentation/sections/connected_products_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/featured_apps_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/footer_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/hero_section.dart';
@@ -48,6 +49,7 @@ class _HomePageState extends State<HomePage> {
               key: _portfolioKey,
               apps: AppProjectsRepository.all,
             ),
+            const ConnectedProductsSection(),
             CapabilitiesSection(key: _capabilitiesKey),
             const AboutSection(),
             const FooterSection(),

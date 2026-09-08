@@ -26,6 +26,7 @@ class AppProject {
     this.platformStages = const {},
     this.links = const [],
     this.highlights = const [],
+    this.companionProductNote,
     this.featured = false,
   });
 
@@ -63,6 +64,10 @@ class AppProject {
 
   /// Short factual bullets for the detail sheet.
   final List<String> highlights;
+
+  /// Set only where a physical product from [ConnectedProductsRepository]
+  /// belongs to this app, so the detail sheet can name that relationship.
+  final String? companionProductNote;
 
   /// Gets a larger card in the portfolio grid.
   final bool featured;
