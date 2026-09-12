@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:catlab_studios/core/theme/app_theme.dart';
@@ -75,6 +79,49 @@ Future<void> _showDetailSheet(WidgetTester tester, AppProject project) async {
     ),
   );
   await tester.pump();
+}
+
+
+/// Paints one scene's visual in isolation and returns the pixels.
+///
+/// Comparing two of these is how the reduced-motion promise gets checked for
+/// real: the diagrams are CustomPainters, so no widget assertion can tell
+/// whether they actually stopped moving — only their output can.
+Future<Uint8List> _paintVisual(
+  WidgetTester tester,
+  VisionScene scene,
+  VisionVisualState state,
+) async {
+  final key = GlobalKey();
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.dark,
+      home: Scaffold(
+        body: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              width: 400,
+              height: 300,
+              child: Builder(builder: (c) => scene.visual(c, state)),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  final boundary =
+      key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+  // toImage needs real async, which the test clock otherwise suspends.
+  final bytes = await tester.runAsync(() async {
+    final image = await boundary.toImage();
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    return data!.buffer.asUint8List();
+  });
+  return bytes!;
 }
 
 void main() {
@@ -350,6 +397,67 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+  });
+
+  // ── Reduced motion, at the pixel level ───────────────────────────────────
+  group('reduced motion diagrams', () {
+    testWidgets('every scene visual is genuinely static', (tester) async {
+      for (final scene in _story.scenes) {
+        final atStart = await _paintVisual(
+          tester,
+          scene,
+          const VisionVisualState(
+              entrance: 0, progress: 0, reducedMotion: true),
+        );
+        final atEnd = await _paintVisual(
+          tester,
+          scene,
+          const VisionVisualState(
+              entrance: 1, progress: 1, reducedMotion: true),
+        );
+        expect(atEnd, equals(atStart),
+            reason: 'scene "${scene.id}" still animates under reduced motion');
+      }
+    });
+
+    testWidgets('and shows its finished state rather than an empty box',
+        (tester) async {
+      for (final scene in _story.scenes) {
+        final reduced = await _paintVisual(
+          tester,
+          scene,
+          const VisionVisualState(
+              entrance: 0, progress: 0, reducedMotion: true),
+        );
+        final unbuilt = await _paintVisual(
+          tester,
+          scene,
+          const VisionVisualState(
+              entrance: 0, progress: 0, reducedMotion: false),
+        );
+        // At t=0 an animated scene has barely drawn anything; the reduced
+        // one must already be complete, so the two cannot match.
+        expect(reduced, isNot(equals(unbuilt)),
+            reason: 'scene "${scene.id}" renders nothing under reduced motion');
+      }
+    });
+
+    testWidgets('without the preference the diagrams do move', (tester) async {
+      final scene = _story.scenes[1];
+      final early = await _paintVisual(
+        tester,
+        scene,
+        const VisionVisualState(
+            entrance: 0.2, progress: 0.07, reducedMotion: false),
+      );
+      final later = await _paintVisual(
+        tester,
+        scene,
+        const VisionVisualState(
+            entrance: 1, progress: 0.8, reducedMotion: false),
+      );
+      expect(later, isNot(equals(early)));
     });
   });
 
