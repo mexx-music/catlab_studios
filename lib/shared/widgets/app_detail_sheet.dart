@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
+import 'package:catlab_studios/features/vision/data/vision_stories_repository.dart';
+import 'package:catlab_studios/features/vision/domain/vision_story.dart';
+import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
 import 'package:catlab_studios/shared/widgets/beta_access_dialog.dart';
 import 'package:catlab_studios/shared/widgets/app_icon_tile.dart';
 import 'package:catlab_studios/shared/widgets/link_button.dart';
@@ -153,6 +156,16 @@ class AppDetailSheet extends StatelessWidget {
           ),
         ],
 
+        // ── Vision story ─────────────────────────────────────────────────
+        // Only projects with an entry in VisionStoriesRepository get this. It
+        // sits above the factual sections on purpose: what follows describes
+        // today's product, what the button opens describes the direction.
+        if (VisionStoriesRepository.forProject(project.id) case final story?)
+          Padding(
+            padding: const EdgeInsets.only(top: 22),
+            child: _VisionStoryCta(story: story),
+          ),
+
         // ── Highlights ───────────────────────────────────────────────────
         if (project.highlights.isNotEmpty) ...[
           const SizedBox(height: 28),
@@ -239,6 +252,87 @@ class AppDetailSheet extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Secondary action: opens the project's vision story
+// ---------------------------------------------------------------------------
+
+/// A deliberately distinct block rather than another entry in the link row.
+///
+/// The links answer "where can I get this"; this answers "where is this
+/// going", and conflating the two is exactly the confusion the feature exists
+/// to prevent. The runtime sits on the button so a visitor knows it costs a
+/// minute, not a commitment.
+class _VisionStoryCta extends StatelessWidget {
+  const _VisionStoryCta({required this.story});
+
+  final VisionStory story;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 15, 16, 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withValues(alpha: 0.16),
+            AppColors.accent.withValues(alpha: 0.07),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.auto_graph_rounded, size: 15, color: AppColors.accent),
+              SizedBox(width: 8),
+              Text(
+                'THE BIGGER PICTURE',
+                style: TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.4,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 9),
+          Text(
+            'Everything above is what ${story.title} does today. The vision '
+            'story shows where it is heading — and marks clearly which parts '
+            'are not built yet.',
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ElevatedButton.icon(
+            onPressed: () => VisionStoryPlayer.open(context, story),
+            icon: const Icon(Icons.play_arrow_rounded, size: 19),
+            label: Text('${story.ctaLabel}  ·  ${story.runtime.inSeconds}s'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.background,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              textStyle:
+                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(11),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
