@@ -147,11 +147,39 @@ void main() {
           .firstWhere((p) => p.id == 'universal_business');
       await _showDetailSheet(tester, project);
 
-      expect(find.textContaining('Explore the Vision'), findsOneWidget);
+      // Two entry points: the explainer block, and a button in the action
+      // row beside the demo link.
+      expect(find.textContaining('Explore the Vision'), findsNWidgets(2));
       expect(find.text('THE BIGGER PICTURE'), findsOneWidget);
+      expect(find.text('Explore the Vision'), findsOneWidget);
       // The existing factual content is untouched.
       expect(find.text('What it does'.toUpperCase()), findsOneWidget);
       expect(find.text(project.name), findsOneWidget);
+    });
+
+    testWidgets('the action row carries the vision button beside the demo link',
+        (tester) async {
+      final project = AppProjectsRepository.all
+          .firstWhere((p) => p.id == 'universal_business');
+      await _showDetailSheet(tester, project);
+
+      // Both actions live in the same row, in that order.
+      final row = find.ancestor(
+        of: find.text('Explore the Vision'),
+        matching: find.byType(Wrap),
+      );
+      expect(row, findsOneWidget);
+      expect(
+        find.descendant(of: row, matching: find.textContaining('Open Demo')),
+        findsOneWidget,
+      );
+
+      // And it opens the story rather than launching a link.
+      await tester.tap(find.text('Explore the Vision'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(VisionStoryPlayer), findsOneWidget);
+      expect(find.text(_headline(0)), findsOneWidget);
     });
 
     testWidgets('other projects do not get one automatically', (tester) async {

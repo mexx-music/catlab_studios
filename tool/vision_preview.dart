@@ -23,7 +23,9 @@ import 'package:flutter/rendering.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/core/theme/app_theme.dart';
 import 'package:catlab_studios/features/vision/data/business_brain_story.dart';
+import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
+import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
 const String _view = String.fromEnvironment('VIEW', defaultValue: 'desktop');
 /// The macOS app is sandboxed, so shots land in its own container temp
@@ -34,6 +36,8 @@ const bool _reducedMotion = bool.fromEnvironment('REDUCED');
 const Map<String, List<Size>> _frames = {
   'desktop': [Size(960, 640)],
   'mobile': [Size(320, 620), Size(390, 760)],
+  // The project detail sheet, to check the vision button in the action row.
+  'sheet': [Size(620, 760)],
 };
 
 void main() => runApp(const _Preview());
@@ -61,7 +65,16 @@ class _PreviewState extends State<_Preview> {
     Timer(const Duration(seconds: 5), _arm);
   }
 
+  void _armSheet() {
+    setState(() => _armed = true);
+    _timers.add(Timer(const Duration(seconds: 2), () => _capture('sheet')));
+  }
+
   void _arm() {
+    if (_view == 'sheet') {
+      _armSheet();
+      return;
+    }
     setState(() => _armed = true);
 
     // Fire at 60% through each scene — past the entrance, before the exit.
@@ -150,12 +163,24 @@ class _Frame extends StatelessWidget {
         height: size.height,
         child: MediaQuery(
           data: MediaQueryData(size: size, disableAnimations: _reducedMotion),
-          // Its own MaterialApp so the player gets a Navigator sized like the
-          // device it is standing in for.
+          // Its own MaterialApp so the content gets a Navigator sized like
+          // the device it is standing in for.
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.dark,
-            home: VisionStoryPlayer(story: businessBrainStory),
+            home: _view == 'sheet'
+                ? Scaffold(
+                    backgroundColor: AppColors.background,
+                    body: SingleChildScrollView(
+                      padding: const EdgeInsets.all(22),
+                      child: AppDetailSheet(
+                        project: AppProjectsRepository.all.firstWhere(
+                          (p) => p.id == businessBrainStory.projectId,
+                        ),
+                      ),
+                    ),
+                  )
+                : VisionStoryPlayer(story: businessBrainStory),
           ),
         ),
       ),

@@ -62,6 +62,8 @@ class AppDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visionStory = VisionStoriesRepository.forProject(project.id);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -160,10 +162,10 @@ class AppDetailSheet extends StatelessWidget {
         // Only projects with an entry in VisionStoriesRepository get this. It
         // sits above the factual sections on purpose: what follows describes
         // today's product, what the button opens describes the direction.
-        if (VisionStoriesRepository.forProject(project.id) case final story?)
+        if (visionStory != null)
           Padding(
             padding: const EdgeInsets.only(top: 22),
-            child: _VisionStoryCta(story: story),
+            child: _VisionStoryCta(story: visionStory),
           ),
 
         // ── Highlights ───────────────────────────────────────────────────
@@ -215,7 +217,9 @@ class AppDetailSheet extends StatelessWidget {
 
         // ── Links ────────────────────────────────────────────────────────
         const SizedBox(height: 26),
-        if (project.hasLinks)
+        if (project.hasLinks ||
+            project.hasBetaPlatform ||
+            visionStory != null)
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -226,6 +230,11 @@ class AppDetailSheet extends StatelessWidget {
                   filled: i == 0,
                   useLongLabel: true,
                 ),
+              // Sits with the links because that is where a visitor looks for
+              // something to open, but carries its own treatment: it opens a
+              // presentation inside the site, not an outbound page.
+              if (visionStory != null)
+                _VisionStoryButton(story: visionStory),
               // A closed test has no public store page to link to, so the
               // beta action stands in for the missing Play button.
               if (project.hasBetaPlatform)
@@ -332,6 +341,35 @@ class _VisionStoryCta extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The compact twin of [_VisionStoryCta], for the action row.
+///
+/// Violet rather than gold so it never reads as one more outbound link
+/// sitting next to the store and demo buttons.
+class _VisionStoryButton extends StatelessWidget {
+  const _VisionStoryButton({required this.story});
+
+  final VisionStory story;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => VisionStoryPlayer.open(context, story),
+      icon: const Icon(Icons.auto_graph_rounded, size: 16),
+      label: Text(story.ctaLabel),
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.primary.withValues(alpha: 0.30),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.85)),
+        ),
       ),
     );
   }
