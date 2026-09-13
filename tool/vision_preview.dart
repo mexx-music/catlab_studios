@@ -25,6 +25,7 @@ import 'package:catlab_studios/core/theme/app_theme.dart';
 import 'package:catlab_studios/features/vision/data/business_brain_story.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
+import 'package:catlab_studios/shared/widgets/app_card.dart';
 import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
 const String _view = String.fromEnvironment('VIEW', defaultValue: 'desktop');
@@ -38,6 +39,9 @@ const Map<String, List<Size>> _frames = {
   'mobile': [Size(320, 620), Size(390, 760)],
   // The project detail sheet, to check the vision button in the action row.
   'sheet': [Size(620, 760)],
+  // Portfolio cards at the real grid widths: 4-column desktop, 3-column
+  // laptop, 2-column tablet and a 1-column phone.
+  'cards': [Size(333, 260), Size(453, 260), Size(350, 260), Size(280, 260)],
 };
 
 void main() => runApp(const _Preview());
@@ -65,14 +69,14 @@ class _PreviewState extends State<_Preview> {
     Timer(const Duration(seconds: 5), _arm);
   }
 
-  void _armSheet() {
+  void _armStatic() {
     setState(() => _armed = true);
-    _timers.add(Timer(const Duration(seconds: 2), () => _capture('sheet')));
+    _timers.add(Timer(const Duration(seconds: 2), () => _capture(_view)));
   }
 
   void _arm() {
-    if (_view == 'sheet') {
-      _armSheet();
+    if (_view == 'sheet' || _view == 'cards') {
+      _armStatic();
       return;
     }
     setState(() => _armed = true);
@@ -168,7 +172,19 @@ class _Frame extends StatelessWidget {
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: AppTheme.dark,
-            home: _view == 'sheet'
+            home: _view == 'cards'
+                ? Scaffold(
+                    backgroundColor: AppColors.surface,
+                    body: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: AppCard(
+                        project: AppProjectsRepository.all.firstWhere(
+                          (p) => p.id == businessBrainStory.projectId,
+                        ),
+                      ),
+                    ),
+                  )
+                : _view == 'sheet'
                 ? Scaffold(
                     backgroundColor: AppColors.background,
                     body: SingleChildScrollView(

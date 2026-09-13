@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
+import 'package:catlab_studios/features/vision/data/vision_stories_repository.dart';
+import 'package:catlab_studios/features/vision/domain/vision_story.dart';
+import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
 import 'package:catlab_studios/shared/widgets/app_icon_tile.dart';
 import 'package:catlab_studios/shared/widgets/link_button.dart';
 import 'package:catlab_studios/shared/widgets/platform_chips.dart';
@@ -142,31 +145,129 @@ class _AppCardState extends State<AppCard> {
 
                     const Spacer(),
 
-                    // ── Platforms + links ────────────────────────────────
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PlatformChips(
-                            platforms: project.platforms,
-                            stages: project.platformStages,
-                          ),
-                        ),
-                        if (project.hasLinks) ...[
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: LinkButton(
-                              link: project.primaryLink!,
-                              filled: featured,
-                            ),
-                          ),
-                        ] else
-                          _DetailsHint(hovered: _hovered),
-                      ],
+                    // ── Platforms + actions ──────────────────────────────
+                    // The card height is fixed by the grid, so everything here
+                    // has to share one row; the vision button trades its label
+                    // for an icon before anything is allowed to overflow.
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final story =
+                            VisionStoriesRepository.forProject(project.id);
+                        final hasLink = project.hasLinks;
+                        // Below this the two buttons plus the chips stop
+                        // fitting side by side, and the vision button gives up
+                        // its label rather than squeezing the link button's.
+                        // Measured, not guessed: the link button alone is
+                        // 168px and the labelled vision button 126px, so a
+                        // card carrying both has to give something up.
+                        // The platform chips go first — one small glyph, and
+                        // the detail sheet states the platforms in full — and
+                        // only on a card too narrow even for that does the
+                        // button fall back to its icon.
+                        final labelled =
+                            constraints.maxWidth >= (hasLink ? 302 : 150);
+                        final tight =
+                            story != null && labelled && constraints.maxWidth < 380;
+
+                        return Row(
+                          children: [
+                            // The only flexible child: the buttons keep their
+                            // natural width so a link label is never clipped.
+                            if (tight)
+                              const Spacer()
+                            else
+                              Expanded(
+                                child: PlatformChips(
+                                  platforms: project.platforms,
+                                  stages: project.platformStages,
+                                ),
+                              ),
+                            if (hasLink) ...[
+                              const SizedBox(width: 8),
+                              LinkButton(
+                                link: project.primaryLink!,
+                                filled: featured,
+                              ),
+                            ],
+                            if (story != null) ...[
+                              const SizedBox(width: 6),
+                              _CardVisionButton(
+                                story: story,
+                                labelled: labelled,
+                              ),
+                            ] else if (!hasLink)
+                              _DetailsHint(hovered: _hovered),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Opens the project's vision story straight from the card
+// ---------------------------------------------------------------------------
+
+/// Violet, so it never reads as one more outbound link next to the gold store
+/// and demo buttons: this one opens a presentation inside the site.
+///
+/// Drops to icon-only when the row is too tight for the words, which is what
+/// keeps it on a one-column phone card without pushing anything off the edge.
+class _CardVisionButton extends StatelessWidget {
+  const _CardVisionButton({required this.story, required this.labelled});
+
+  final VisionStory story;
+
+  /// False when the row is too tight for the word, which is most of the
+  /// three- and four-column desktop grid: the link button alone is 168px.
+  final bool labelled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: story.ctaLabel,
+      child: Semantics(
+        button: true,
+        label: story.ctaLabel,
+        child: TextButton(
+          onPressed: () => VisionStoryPlayer.open(context, story),
+          style: TextButton.styleFrom(
+            foregroundColor: AppColors.textPrimary,
+            backgroundColor: AppColors.primary.withValues(alpha: 0.34),
+            // Every pixel here is one the demo link would otherwise lose, so
+            // the button is sized by hand rather than by the button theme.
+            padding: EdgeInsets.symmetric(
+              horizontal: labelled ? 9 : 11,
+              vertical: 11,
+            ),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: AppColors.primary.withValues(alpha: 0.9)),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.auto_graph_rounded, size: 15),
+              if (labelled) ...[
+                const SizedBox(width: 5),
+                const Text(
+                  'Vision',
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ],
           ),
         ),
       ),

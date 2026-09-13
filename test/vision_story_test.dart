@@ -12,6 +12,7 @@ import 'package:catlab_studios/features/vision/data/business_brain_story.dart';
 import 'package:catlab_studios/features/vision/data/vision_stories_repository.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
 import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
+import 'package:catlab_studios/shared/widgets/app_card.dart';
 import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
 final VisionStory _story = businessBrainStory;
@@ -124,6 +125,30 @@ Future<Uint8List> _paintVisual(
   return bytes!;
 }
 
+
+/// Renders one portfolio card at a given grid column width.
+Future<void> _showCard(
+    WidgetTester tester, AppProject project, double width) async {
+  tester.view.physicalSize = const Size(1400, 900);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.dark,
+      home: Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: width,
+            height: 260,
+            child: AppCard(project: project),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
 void main() {
   // ── Which projects get a vision story ────────────────────────────────────
   group('vision story eligibility', () {
@@ -180,6 +205,60 @@ void main() {
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.byType(VisionStoryPlayer), findsOneWidget);
       expect(find.text(_headline(0)), findsOneWidget);
+    });
+
+    testWidgets('the portfolio card carries the vision action too',
+        (tester) async {
+      final project = AppProjectsRepository.all
+          .firstWhere((p) => p.id == 'universal_business');
+      await _showCard(tester, project, 420);
+
+      // The demo link keeps its full label — the vision button must not
+      // squeeze it, which is exactly what a shared flex once did.
+      expect(find.text('Open Demo'), findsOneWidget);
+      expect(find.text('Vision'), findsOneWidget);
+      expect(find.byTooltip('Explore the Vision'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Explore the Vision'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byType(VisionStoryPlayer), findsOneWidget);
+      expect(find.text(_headline(0)), findsOneWidget);
+    });
+
+    testWidgets('a narrow card keeps the action but drops its label',
+        (tester) async {
+      final project = AppProjectsRepository.all
+          .firstWhere((p) => p.id == 'universal_business');
+      // A four-column desktop card: too narrow for two labelled buttons.
+      await _showCard(tester, project, 333);
+
+      expect(find.text('Open Demo'), findsOneWidget);
+      expect(find.text('Vision'), findsNothing);
+      // Still there, still reachable, still named for a screen reader.
+      expect(find.byTooltip('Explore the Vision'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('cards fit at every grid width', (tester) async {
+      final project = AppProjectsRepository.all
+          .firstWhere((p) => p.id == 'universal_business');
+      // Every card width the grid actually produces, from a 320px phone in
+      // one column to a 1920px desktop in four.
+      for (final width in <double>[280, 300, 312, 333, 340, 350, 415, 453, 520]) {
+        await _showCard(tester, project, width);
+        expect(tester.takeException(), isNull,
+            reason: 'card overflowed at ${width.toInt()}px');
+      }
+    });
+
+    testWidgets('a card without a story shows no vision action',
+        (tester) async {
+      final project =
+          AppProjectsRepository.all.firstWhere((p) => p.id == 'hb_cure');
+      await _showCard(tester, project, 420);
+      expect(find.byTooltip('Explore the Vision'), findsNothing);
+      expect(find.text('Vision'), findsNothing);
     });
 
     testWidgets('other projects do not get one automatically', (tester) async {
