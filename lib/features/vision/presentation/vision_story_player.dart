@@ -313,7 +313,7 @@ class _SceneView extends StatelessWidget {
 
     final layout = metrics.wide
         ? Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(flex: 7, child: copy),
               SizedBox(width: metrics.gutter),
@@ -503,26 +503,36 @@ class _SceneCopy extends StatelessWidget {
         ..add(_Ending(controller: controller, onClose: onClose));
     }
 
-    final column = SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
-    );
-    // A scene's copy can run longer than the space it has — a phone always,
-    // a desktop once a translation is long enough. Fading the last few pixels
-    // says "there is more" instead of looking like a clipping bug; the
-    // content itself stays scrollable and complete.
-    return ShaderMask(
-      shaderCallback: (rect) => const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.white, Colors.white, Colors.transparent],
-        stops: [0.0, 0.94, 1.0],
-      ).createShader(rect),
-      blendMode: BlendMode.dstIn,
-      child: column,
+    // The scroll view must fill its box, not shrink-wrap its content.
+    // Wrapping the content instead put the fade at the end of the *text*, so
+    // it greyed out the last line on every scene even with room to spare —
+    // which reads as a rendering fault, not as "there is more below".
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final column = SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        );
+
+        // Fade only what actually reaches the bottom edge. When the copy fits,
+        // there is nothing painted there and the mask is invisible.
+        return ShaderMask(
+          shaderCallback: (rect) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.white, Colors.white, Colors.transparent],
+            stops: [0.0, 0.94, 1.0],
+          ).createShader(rect),
+          blendMode: BlendMode.dstIn,
+          child: column,
+        );
+      },
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
-import 'package:catlab_studios/features/vision/presentation/vision_visuals.dart';
+import 'package:catlab_studios/features/vision/presentation/vision_paint.dart';
 
 /// Playback state for one vision story.
 ///

@@ -1,6 +1,6 @@
 import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
-import 'package:catlab_studios/features/vision/presentation/vision_visuals.dart';
+import 'package:catlab_studios/features/vision/presentation/business_brain_visuals.dart';
 
 /// The vision story for Universal Business / Business Brain.
 ///

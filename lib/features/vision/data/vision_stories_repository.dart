@@ -1,4 +1,5 @@
 import 'package:catlab_studios/features/vision/data/business_brain_story.dart';
+import 'package:catlab_studios/features/vision/data/master_chat_story.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
 
 /// Which portfolio projects have a vision story, and what it is.
@@ -10,7 +11,7 @@ import 'package:catlab_studios/features/vision/domain/vision_story.dart';
 /// AI-hint: add a story only where the project's own repository documents a
 /// direction worth showing — an invented vision is worse than none.
 abstract final class VisionStoriesRepository {
-  static final List<VisionStory> all = [businessBrainStory];
+  static final List<VisionStory> all = [businessBrainStory, masterChatStory];
 
   static VisionStory? forProject(String projectId) {
     for (final story in all) {

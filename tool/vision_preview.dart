@@ -28,6 +28,8 @@ import 'package:catlab_studios/core/l10n/locale_scope.dart';
 import 'package:catlab_studios/features/home/presentation/pages/home_page.dart';
 import 'package:catlab_studios/core/theme/app_theme.dart';
 import 'package:catlab_studios/features/vision/data/business_brain_story.dart';
+import 'package:catlab_studios/features/vision/data/master_chat_story.dart';
+import 'package:catlab_studios/features/vision/domain/vision_story.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/features/vision/presentation/vision_story_player.dart';
 import 'package:catlab_studios/shared/widgets/app_card.dart';
@@ -40,6 +42,10 @@ const String _view = String.fromEnvironment('VIEW', defaultValue: 'desktop');
 final String _out = Directory.systemTemp.path;
 const bool _reducedMotion = bool.fromEnvironment('REDUCED');
 const String _locale = String.fromEnvironment('LOCALE', defaultValue: 'en');
+const String _story = String.fromEnvironment('STORY', defaultValue: 'business');
+
+VisionStory get _selected =>
+    _story == 'master' ? masterChatStory : businessBrainStory;
 
 const Map<String, List<Size>> _frames = {
   'desktop': [Size(960, 640)],
@@ -93,8 +99,8 @@ class _PreviewState extends State<_Preview> {
 
     // Fire at 60% through each scene — past the entrance, before the exit.
     var elapsed = Duration.zero;
-    for (var i = 0; i < businessBrainStory.sceneCount; i++) {
-      final duration = businessBrainStory.scenes[i].duration;
+    for (var i = 0; i < _selected.sceneCount; i++) {
+      final duration = _selected.scenes[i].duration;
       final at = elapsed + duration * 0.6;
       _timers.add(Timer(at, () => _capture('scene${i + 1}')));
       elapsed += duration;
@@ -224,7 +230,7 @@ class _Frame extends StatelessWidget {
                             padding: const EdgeInsets.all(10),
                             child: AppCard(
                               project: AppProjectsRepository.all.firstWhere(
-                                (p) => p.id == businessBrainStory.projectId,
+                                (p) => p.id == _selected.projectId,
                               ),
                             ),
                           ),
@@ -236,12 +242,12 @@ class _Frame extends StatelessWidget {
                             padding: const EdgeInsets.all(22),
                             child: AppDetailSheet(
                               project: AppProjectsRepository.all.firstWhere(
-                                (p) => p.id == businessBrainStory.projectId,
+                                (p) => p.id == _selected.projectId,
                               ),
                             ),
                           ),
                         )
-                      : VisionStoryPlayer(story: businessBrainStory),
+                      : VisionStoryPlayer(story: _selected),
                 ),
               ),
       ),
