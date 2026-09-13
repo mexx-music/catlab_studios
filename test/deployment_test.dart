@@ -20,26 +20,30 @@ void main() {
       expect(
         text.contains('--base-href /catlab_studios/'),
         isFalse,
-        reason: 'the old project-path base-href breaks every asset URL on '
+        reason:
+            'the old project-path base-href breaks every asset URL on '
             'catlabstudios.com',
       );
-      expect(RegExp(r'--base-href\s+/\s*$', multiLine: true).hasMatch(text),
-          isTrue,
-          reason: 'expected --base-href / for the apex domain');
+      expect(
+        RegExp(r'--base-href\s+/\s*$', multiLine: true).hasMatch(text),
+        isTrue,
+        reason: 'expected --base-href / for the apex domain',
+      );
     });
 
     test('CNAME ships with the build so deployments keep the domain', () {
-      expect(cname.existsSync(), isTrue,
-          reason: 'web/CNAME is copied into build/web and travels with the '
-              'Pages artifact');
+      expect(
+        cname.existsSync(),
+        isTrue,
+        reason:
+            'web/CNAME is copied into build/web and travels with the '
+            'Pages artifact',
+      );
       expect(cname.readAsStringSync().trim(), 'catlabstudios.com');
     });
 
     test('no web asset hard-codes the old project path', () {
-      for (final file in [
-        File('web/index.html'),
-        manifest,
-      ]) {
+      for (final file in [File('web/index.html'), manifest]) {
         expect(
           file.readAsStringSync().contains('/catlab_studios/'),
           isFalse,
@@ -53,8 +57,11 @@ void main() {
       // domain to this repo must not take them offline.
       for (final slug in ['purrlove', 'cat-purr-relax']) {
         final page = File('web/privacy/$slug/index.html');
-        expect(page.existsSync(), isTrue,
-            reason: 'catlabstudios.com/privacy/$slug/ must keep resolving');
+        expect(
+          page.existsSync(),
+          isTrue,
+          reason: 'catlabstudios.com/privacy/$slug/ must keep resolving',
+        );
         expect(page.readAsStringSync().toLowerCase(), contains('privacy'));
       }
     });

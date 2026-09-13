@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
 import 'package:catlab_studios/features/vision/data/vision_stories_repository.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
@@ -90,7 +92,7 @@ class AppDetailSheet extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    project.categoryLabel,
+                    context.t(project.categoryLabel),
                     style: const TextStyle(
                       color: AppColors.accent,
                       fontSize: 11.5,
@@ -107,7 +109,7 @@ class AppDetailSheet extends StatelessWidget {
               onPressed: () => Navigator.of(context).maybePop(),
               icon: const Icon(Icons.close_rounded),
               color: AppColors.textMuted,
-              tooltip: 'Close',
+              tooltip: context.t(SiteText.actionClose),
             ),
           ],
         ),
@@ -115,7 +117,7 @@ class AppDetailSheet extends StatelessWidget {
 
         // ── Description ──────────────────────────────────────────────────
         Text(
-          project.description,
+          context.t(project.description),
           style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 15,
@@ -145,7 +147,7 @@ class AppDetailSheet extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    project.companionProductNote!,
+                    context.t(project.companionProductNote!),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
@@ -171,7 +173,7 @@ class AppDetailSheet extends StatelessWidget {
         // ── Highlights ───────────────────────────────────────────────────
         if (project.highlights.isNotEmpty) ...[
           const SizedBox(height: 28),
-          const _SectionLabel('What it does'),
+          _SectionLabel(context.t(SiteText.detailWhatItDoes)),
           const SizedBox(height: 12),
           for (final highlight in project.highlights)
             Padding(
@@ -181,16 +183,12 @@ class AppDetailSheet extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.only(top: 6),
-                    child: Icon(
-                      Icons.circle,
-                      size: 5,
-                      color: AppColors.accent,
-                    ),
+                    child: Icon(Icons.circle, size: 5, color: AppColors.accent),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      highlight,
+                      context.t(highlight),
                       style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -206,7 +204,7 @@ class AppDetailSheet extends StatelessWidget {
         // ── Platforms ────────────────────────────────────────────────────
         if (project.platforms.isNotEmpty) ...[
           const SizedBox(height: 22),
-          const _SectionLabel('Platforms'),
+          _SectionLabel(context.t(SiteText.detailPlatforms)),
           const SizedBox(height: 12),
           PlatformChips(
             platforms: project.platforms,
@@ -217,9 +215,7 @@ class AppDetailSheet extends StatelessWidget {
 
         // ── Links ────────────────────────────────────────────────────────
         const SizedBox(height: 26),
-        if (project.hasLinks ||
-            project.hasBetaPlatform ||
-            visionStory != null)
+        if (project.hasLinks || project.hasBetaPlatform || visionStory != null)
           Wrap(
             spacing: 10,
             runSpacing: 10,
@@ -233,8 +229,7 @@ class AppDetailSheet extends StatelessWidget {
               // Sits with the links because that is where a visitor looks for
               // something to open, but carries its own treatment: it opens a
               // presentation inside the site, not an outbound page.
-              if (visionStory != null)
-                _VisionStoryButton(story: visionStory),
+              if (visionStory != null) _VisionStoryButton(story: visionStory),
               // A closed test has no public store page to link to, so the
               // beta action stands in for the missing Play button.
               if (project.hasBetaPlatform)
@@ -250,10 +245,9 @@ class AppDetailSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.cardBorder),
             ),
-            child: const Text(
-              'Not publicly available yet — no download or demo link to share '
-              'at this stage.',
-              style: TextStyle(
+            child: Text(
+              context.t(SiteText.detailNoLinks),
+              style: const TextStyle(
                 color: AppColors.textMuted,
                 fontSize: 13,
                 height: 1.5,
@@ -300,11 +294,15 @@ class _VisionStoryCta extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_graph_rounded, size: 15, color: AppColors.accent),
-              SizedBox(width: 8),
+              const Icon(
+                Icons.auto_graph_rounded,
+                size: 15,
+                color: AppColors.accent,
+              ),
+              const SizedBox(width: 8),
               Text(
-                'THE BIGGER PICTURE',
-                style: TextStyle(
+                context.t(SiteText.visionCtaLabel),
+                style: const TextStyle(
                   color: AppColors.accent,
                   fontSize: 9.5,
                   fontWeight: FontWeight.w800,
@@ -315,9 +313,10 @@ class _VisionStoryCta extends StatelessWidget {
           ),
           const SizedBox(height: 9),
           Text(
-            'Everything above is what ${story.title} does today. The vision '
-            'story shows where it is heading — and marks clearly which parts '
-            'are not built yet.',
+            context.t(
+              SiteText.visionCtaBody,
+              params: {'project': context.t(story.title)},
+            ),
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 13,
@@ -328,13 +327,17 @@ class _VisionStoryCta extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () => VisionStoryPlayer.open(context, story),
             icon: const Icon(Icons.play_arrow_rounded, size: 19),
-            label: Text('${story.ctaLabel}  ·  ${story.runtime.inSeconds}s'),
+            label: Text(
+              '${context.t(story.ctaLabel)}  ·  ${story.runtime.inSeconds}s',
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent,
               foregroundColor: AppColors.background,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              textStyle:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+              textStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(11),
               ),
@@ -360,7 +363,7 @@ class _VisionStoryButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: () => VisionStoryPlayer.open(context, story),
       icon: const Icon(Icons.auto_graph_rounded, size: 16),
-      label: Text(story.ctaLabel),
+      label: Text(context.t(story.ctaLabel)),
       style: TextButton.styleFrom(
         foregroundColor: AppColors.textPrimary,
         backgroundColor: AppColors.primary.withValues(alpha: 0.30),
@@ -388,7 +391,7 @@ class _BetaAccessButton extends StatelessWidget {
     return TextButton.icon(
       onPressed: () => BetaAccessDialog.show(context, appName),
       icon: const Icon(Icons.android_rounded, size: 16),
-      label: const Text('Join Android Beta'),
+      label: Text(context.t(SiteText.betaJoinShort)),
       style: TextButton.styleFrom(
         foregroundColor: AppColors.statusInDevelopment,
         backgroundColor: AppColors.statusInDevelopment.withAlpha(16),
@@ -396,9 +399,7 @@ class _BetaAccessButton extends StatelessWidget {
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
-            color: AppColors.statusInDevelopment.withAlpha(70),
-          ),
+          side: BorderSide(color: AppColors.statusInDevelopment.withAlpha(70)),
         ),
       ),
     );

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/shared/widgets/language_switcher.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 
 /// Full-width hero banner at the top of the landing page.
 /// AI-hint: Add scroll-triggered fade-in animation (AnimationController) here.
@@ -67,6 +70,15 @@ class HeroSection extends StatelessWidget {
             onExploreApps: onExploreApps,
             onWhatWeBuild: onWhatWeBuild,
           ),
+
+          // ── Layer 6: Language ──────────────────────────────────────────
+          // Top right of the first thing a visitor sees, so someone who
+          // landed in the wrong language finds it without scrolling.
+          const Positioned(
+            top: 16,
+            right: 16,
+            child: SafeArea(child: LanguageSwitcher()),
+          ),
         ],
       ),
     );
@@ -105,7 +117,7 @@ class _HeroContent extends StatelessWidget {
                 ? CrossAxisAlignment.center
                 : CrossAxisAlignment.start,
             children: [
-              const _GoldBadge(label: 'INDEPENDENT SOFTWARE STUDIO'),
+              _GoldBadge(label: context.t(SiteText.heroBadge)),
               const SizedBox(height: 28),
               _GlowHeadline(isNarrow: isNarrow),
               const SizedBox(height: 18),
@@ -197,7 +209,7 @@ class _Subline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Practical, creative and AI-powered software.',
+      context.t(SiteText.heroSubline),
       textAlign: isNarrow ? TextAlign.center : TextAlign.start,
       style: TextStyle(
         fontSize: isNarrow ? 19 : 26,
@@ -223,9 +235,7 @@ class _BodyText extends StatelessWidget {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 560),
       child: Text(
-        'CatLab Studios is an independent software studio building '
-        'applications across mobile, web and desktop — from AI platforms and '
-        'business tools to health, logistics and games.',
+        context.t(SiteText.heroBody),
         textAlign: isNarrow ? TextAlign.center : TextAlign.start,
         style: const TextStyle(
           fontSize: 15,
@@ -259,14 +269,14 @@ class _CtaRow extends StatelessWidget {
       runSpacing: 14,
       children: [
         _CtaButton(
-          label: 'Explore Apps',
+          label: context.t(SiteText.heroExploreApps),
           icon: Icons.apps_rounded,
           primary: true,
           compact: isNarrow,
           onPressed: onExploreApps,
         ),
         _CtaButton(
-          label: 'What We Build',
+          label: context.t(SiteText.heroWhatWeBuild),
           icon: Icons.layers_outlined,
           primary: false,
           compact: isNarrow,
@@ -311,8 +321,10 @@ class _CtaButtonState extends State<_CtaButton> {
     borderRadius: BorderRadius.all(Radius.circular(12)),
   );
   static const _padding = EdgeInsets.symmetric(horizontal: 28, vertical: 16);
-  static const _compactPadding =
-      EdgeInsets.symmetric(horizontal: 18, vertical: 14);
+  static const _compactPadding = EdgeInsets.symmetric(
+    horizontal: 18,
+    vertical: 14,
+  );
   static const _textStyle = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.w700,

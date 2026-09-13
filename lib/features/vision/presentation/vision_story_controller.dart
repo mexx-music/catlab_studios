@@ -23,11 +23,11 @@ class VisionStoryController extends ChangeNotifier {
     required this.story,
     required TickerProvider vsync,
     bool reducedMotion = false,
-  })  : _reducedMotion = reducedMotion,
-        _scene = AnimationController(
-          vsync: vsync,
-          duration: story.scenes.first.duration,
-        ) {
+  }) : _reducedMotion = reducedMotion,
+       _scene = AnimationController(
+         vsync: vsync,
+         duration: story.scenes.first.duration,
+       ) {
     _scene.addStatusListener(_onSceneStatus);
   }
 
@@ -67,10 +67,10 @@ class VisionStoryController extends ChangeNotifier {
 
   /// The per-frame inputs a scene visual needs.
   VisionVisualState get visualState => VisionVisualState(
-        entrance: (_scene.value / kEntranceFraction).clamp(0.0, 1.0),
-        progress: _scene.value,
-        reducedMotion: _reducedMotion,
-      );
+    entrance: (_scene.value / kEntranceFraction).clamp(0.0, 1.0),
+    progress: _scene.value,
+    reducedMotion: _reducedMotion,
+  );
 
   /// How full a given scene's progress segment should be drawn.
   double segmentFill(int sceneIndex) {

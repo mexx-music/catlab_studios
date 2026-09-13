@@ -1,3 +1,4 @@
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/models/app_link.dart';
 
 /// A physical product that has software from the portfolio attached to it.
@@ -27,11 +28,11 @@ class ConnectedProduct {
   final String name;
 
   /// One warm line, shown under the name.
-  final String tagline;
+  final LocalizedText tagline;
 
   /// Two or three sentences. Only claims backed by the product's own site or
   /// its source project — no invented capabilities.
-  final String description;
+  final LocalizedText description;
 
   /// The main product shot.
   final String imageAsset;
@@ -39,7 +40,7 @@ class ConnectedProduct {
   /// Optional second shot, layered smaller in front of [imageAsset].
   final String? secondaryImageAsset;
 
-  final List<String> highlights;
+  final List<LocalizedText> highlights;
   final List<AppLink> links;
 
   /// Id of the [AppProject] that belongs to this product, so the section can
@@ -47,7 +48,7 @@ class ConnectedProduct {
   final String? companionAppId;
 
   /// How the app relates to the product, in the product's own terms.
-  final String? companionAppNote;
+  final LocalizedText? companionAppNote;
 
   bool get hasCompanionApp => companionAppId != null;
 }

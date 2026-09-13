@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/core/utils/link_launcher.dart';
 import 'package:catlab_studios/data/models/app_link.dart';
@@ -30,7 +31,7 @@ class LinkButton extends StatelessWidget {
         onPressed: () => LinkLauncher.open(link.url),
         icon: Icon(link.kind.icon, size: 15),
         label: Text(
-          useLongLabel ? link.displayLongLabel : link.displayLabel,
+          context.t(useLongLabel ? link.displayLongLabel : link.displayLabel),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

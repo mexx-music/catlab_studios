@@ -1,19 +1,21 @@
 import 'package:flutter/widgets.dart';
 
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+
 /// How a statement in a scene relates to the product as it exists today.
 ///
 /// This is the heart of the feature: the site shows ambitious direction for
 /// unfinished projects without ever implying that planned work already ships.
 enum VisionStage {
   /// Verifiable in the product right now.
-  today('Today'),
+  today(LocalizedText({'en': 'Today', 'de': 'Heute'})),
 
   /// Intended direction. Not built, not promised.
-  vision('Vision');
+  vision(LocalizedText({'en': 'Vision', 'de': 'Vision'}));
 
   const VisionStage(this.label);
 
-  final String label;
+  final LocalizedText label;
 }
 
 /// Per-frame state handed to a scene's visual while it plays.
@@ -56,15 +58,15 @@ class VisionScene {
   final String id;
 
   /// Small label above the headline, e.g. 'Connect knowledge'.
-  final String kicker;
+  final LocalizedText kicker;
 
-  final String headline;
+  final LocalizedText headline;
 
   /// Two or three sentences. The scene's argument.
-  final String body;
+  final LocalizedText body;
 
   /// Short supporting lines, revealed one after another.
-  final List<String> points;
+  final List<LocalizedText> points;
 
   /// Null on scenes that make no product claim at all (an opening or a
   /// framing beat), so the badge stays meaningful where it does appear.
@@ -72,7 +74,7 @@ class VisionScene {
 
   /// The honest counterweight on a [VisionStage.vision] scene: one line
   /// naming what exists today, so an ambitious slide can never be misread.
-  final String? stageNote;
+  final LocalizedText? stageNote;
 
   final VisionVisualBuilder visual;
 
@@ -87,20 +89,23 @@ class VisionStory {
     required this.title,
     required this.subtitle,
     required this.scenes,
-    this.ctaLabel = 'Explore the Vision',
+    this.ctaLabel = const LocalizedText({
+      'en': 'Explore the Vision',
+      'de': 'Vision entdecken',
+    }),
   });
 
   /// Matches [AppProject.id]; this is the only thing that decides which
   /// projects get a vision CTA.
   final String projectId;
 
-  final String title;
+  final LocalizedText title;
 
   /// One line under the title inside the player.
-  final String subtitle;
+  final LocalizedText subtitle;
 
   /// Label of the secondary action on the project's detail sheet.
-  final String ctaLabel;
+  final LocalizedText ctaLabel;
 
   final List<VisionScene> scenes;
 

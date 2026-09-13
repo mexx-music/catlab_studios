@@ -1,3 +1,4 @@
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/models/app_link.dart';
 import 'package:catlab_studios/data/models/connected_product.dart';
 
@@ -19,28 +20,54 @@ abstract final class ConnectedProductsRepository {
     ConnectedProduct(
       id: 'schnurrpurr',
       name: 'SchnurrPurr',
-      tagline: 'A purr you can actually hold.',
-      description:
-          'A soft pillow with a hidden pocket, and a small purr module that '
-          'slips inside it — sound, gentle vibration and something to hug, in '
-          'one object. PurrLove is the app that belongs to the set.',
+      tagline: LocalizedText({
+        'en': 'A purr you can actually hold.',
+        'de': 'Ein Schnurren, das man wirklich halten kann.',
+      }),
+      description: LocalizedText({
+        'en':
+            'A soft pillow with a hidden pocket, and a small purr module that '
+            'slips inside it — sound, gentle vibration and something to hug, in '
+            'one object. PurrLove is the app that belongs to the set.',
+        'de':
+            'Ein weiches Kissen mit verborgener Tasche und ein kleines Schnurrmodul, das hineingleitet — Klang, sanfte Vibration und etwas zum Kuscheln in einem Objekt. PurrLove ist die App, die zum Set gehört.',
+      }),
       imageAsset: '$_imagePath/schnurrpurr_pillow.png',
       secondaryImageAsset: '$_imagePath/schnurrpurr_module.png',
       highlights: [
-        'Plush pillow with a hidden module pocket',
-        'Rechargeable module, tuned to the 25–150 Hz purr range',
-        'Slips into any pillow with a pocket',
+        LocalizedText({
+          'en': 'Plush pillow with a hidden module pocket',
+          'de': 'Plüschkissen mit verborgener Modultasche',
+        }),
+        LocalizedText({
+          'en': 'Rechargeable module, tuned to the 25–150 Hz purr range',
+          'de':
+              'Wiederaufladbares Modul, abgestimmt auf den Schnurrbereich von 25–150 Hz',
+        }),
+        LocalizedText({
+          'en': 'Slips into any pillow with a pocket',
+          'de': 'Passt in jedes Kissen mit Tasche',
+        }),
       ],
       links: [
         AppLink(
           kind: AppLinkKind.external,
           url: 'https://schnurrpurr.com',
-          label: 'Discover SchnurrPurr',
-          longLabel: 'Discover SchnurrPurr',
+          label: LocalizedText({
+            'en': 'Discover SchnurrPurr',
+            'de': 'SchnurrPurr entdecken',
+          }),
+          longLabel: LocalizedText({
+            'en': 'Discover SchnurrPurr',
+            'de': 'SchnurrPurr entdecken',
+          }),
         ),
       ],
       companionAppId: 'purrlove',
-      companionAppNote: 'Companion app: PurrLove',
+      companionAppNote: LocalizedText({
+        'en': 'Companion app: PurrLove',
+        'de': 'Passende App: PurrLove',
+      }),
     ),
   ];
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/models/app_status.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/shared/widgets/section_container.dart';
@@ -26,7 +28,7 @@ class AboutSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'About the Studio',
+            context.t(SiteText.aboutTitle),
             style: theme.textTheme.displayMedium?.copyWith(
               fontSize: isNarrow ? 30 : 40,
             ),
@@ -35,11 +37,7 @@ class AboutSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 660),
             child: Text(
-              'CatLab Studios is an independent software studio building '
-              'practical, creative and AI-powered applications across mobile, '
-              'web and desktop. Most of it is built with Flutter, from one '
-              'codebase, by a small team that ships when something is '
-              'genuinely ready.',
+              context.t(SiteText.aboutBody),
               style: theme.textTheme.bodyLarge,
             ),
           ),
@@ -57,12 +55,12 @@ class AboutSection extends StatelessWidget {
 class _StatusLegend extends StatelessWidget {
   const _StatusLegend();
 
-  static const _meanings = <AppStatus, String>{
-    AppStatus.available: 'Released and in use.',
-    AppStatus.advanced: 'Works end to end, being polished before release.',
-    AppStatus.inDevelopment: 'Core features work, still being built out.',
-    AppStatus.prototype: 'A working proof of concept.',
-    AppStatus.concept: 'Scoped, not yet built.',
+  static const _meanings = <AppStatus, LocalizedText>{
+    AppStatus.available: SiteText.legendAvailable,
+    AppStatus.advanced: SiteText.legendAdvanced,
+    AppStatus.inDevelopment: SiteText.legendInDevelopment,
+    AppStatus.prototype: SiteText.legendPrototype,
+    AppStatus.concept: SiteText.legendConcept,
   };
 
   @override
@@ -78,8 +76,8 @@ class _StatusLegend extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'HOW WE LABEL PROGRESS',
+          Text(
+            context.t(SiteText.aboutLegendTitle),
             style: TextStyle(
               color: AppColors.textMuted,
               fontSize: 10.5,
@@ -122,7 +120,7 @@ class _StatusLegend extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${entry.key.label} · '
+                              '${context.t(entry.key.label)} · '
                               '${AppProjectsRepository.all.where((a) => a.status == entry.key).length}',
                               style: TextStyle(
                                 color: entry.key.color,
@@ -132,7 +130,7 @@ class _StatusLegend extends StatelessWidget {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              entry.value,
+                              context.t(entry.value),
                               style: const TextStyle(
                                 color: AppColors.textMuted,
                                 fontSize: 12.5,

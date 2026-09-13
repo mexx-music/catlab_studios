@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
 import 'package:catlab_studios/data/models/app_category.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/shared/widgets/section_container.dart';
@@ -13,32 +15,30 @@ import 'package:catlab_studios/shared/widgets/section_container.dart';
 class CapabilitiesSection extends StatelessWidget {
   const CapabilitiesSection({super.key});
 
-  static const _domains = <AppCategory, ({IconData icon, String blurb})>{
+  static const _domains = <AppCategory, ({IconData icon, LocalizedText blurb})>{
     AppCategory.ai: (
       icon: Icons.auto_awesome_mosaic_rounded,
-      blurb: 'Chat platforms and assistants that route real work to real '
-          'tools.',
+      blurb: SiteText.capabilityAi,
     ),
     AppCategory.business: (
       icon: Icons.business_center_rounded,
-      blurb: 'Company knowledge made usable, with sources and human review.',
+      blurb: SiteText.capabilityBusiness,
     ),
     AppCategory.health: (
       icon: Icons.monitor_heart_rounded,
-      blurb: 'Device control and information tools in the health space.',
+      blurb: SiteText.capabilityHealth,
     ),
     AppCategory.logistics: (
       icon: Icons.local_shipping_rounded,
-      blurb: 'Load planning and arrival times for people who drive for a '
-          'living.',
+      blurb: SiteText.capabilityLogistics,
     ),
     AppCategory.games: (
       icon: Icons.sports_esports_rounded,
-      blurb: 'Casual games — puzzle, arcade and quiz — with our own artwork.',
+      blurb: SiteText.capabilityGames,
     ),
     AppCategory.lifestyle: (
       icon: Icons.nightlight_round,
-      blurb: 'Everyday apps for sleep, focus, calm and a little curiosity.',
+      blurb: SiteText.capabilityLifestyle,
     ),
   };
 
@@ -56,7 +56,7 @@ class CapabilitiesSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'What We Build',
+            context.t(SiteText.capabilitiesTitle),
             style: theme.textTheme.displayMedium?.copyWith(
               fontSize: isNarrow ? 30 : 40,
             ),
@@ -65,8 +65,7 @@ class CapabilitiesSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: Text(
-              'The studio started with cats. It still keeps them — but the '
-              'work now spans six fields.',
+              context.t(SiteText.capabilitiesIntro),
               style: theme.textTheme.bodyLarge,
             ),
           ),
@@ -87,16 +86,18 @@ class CapabilitiesSection extends StatelessWidget {
                   crossAxisSpacing: 18,
                   // Fixed height, not a ratio: the blurb wraps to three lines
                   // on a narrow tile and a ratio would clip it.
+                  // The one-column phone tile is the tightest: a translated
+                  // blurb can run to four lines there.
                   mainAxisExtent: columns > 1
                       ? 198
-                      : (constraints.maxWidth < 380 ? 200 : 178),
+                      : (constraints.maxWidth < 380 ? 216 : 178),
                 ),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
                   return _DomainTile(
                     icon: entry.value.icon,
-                    label: entry.key.label,
-                    blurb: entry.value.blurb,
+                    label: context.t(entry.key.label),
+                    blurb: context.t(entry.value.blurb),
                     count: AppProjectsRepository.byCategory(entry.key).length,
                   );
                 },
@@ -142,7 +143,9 @@ class _DomainTileState extends State<_DomainTile> {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
-          color: _hovered ? AppColors.surface : AppColors.surface.withAlpha(140),
+          color: _hovered
+              ? AppColors.surface
+              : AppColors.surface.withAlpha(140),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: _hovered
@@ -180,12 +183,16 @@ class _DomainTileState extends State<_DomainTile> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              widget.blurb,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 13.5,
-                height: 1.55,
+            // Flexible because the same sentence is a line longer in German
+            // than in English, and the grid fixes the tile height.
+            Flexible(
+              child: Text(
+                widget.blurb,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 13.5,
+                  height: 1.55,
+                ),
               ),
             ),
           ],

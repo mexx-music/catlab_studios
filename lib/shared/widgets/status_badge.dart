@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/models/app_status.dart';
 
 /// Small dot-and-label badge showing where a project stands.
@@ -28,13 +30,20 @@ class StatusBadge extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 7),
-        Text(
-          status.label,
-          style: TextStyle(
-            color: status.color,
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.4,
+        // Flexible so a longer translation shrinks instead of overflowing:
+        // "In Development" is 14 characters, "Fortgeschritten" is 15, and the
+        // card header that holds this badge has no slack to give.
+        Flexible(
+          child: Text(
+            context.t(status.label),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: status.color,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.4,
+            ),
           ),
         ),
       ],

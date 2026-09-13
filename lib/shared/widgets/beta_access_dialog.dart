@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/config/beta_access_config.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/core/utils/link_launcher.dart';
 
 /// Asks a visitor for the Google account they use on their Android device, so
@@ -47,11 +49,11 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
   /// the real authority on whether an account exists.
   String? _validate(String? value) {
     final text = (value ?? '').trim();
-    if (text.isEmpty) return 'Please enter your Google account email address.';
+    if (text.isEmpty) return context.t(SiteText.betaEmptyEmail);
     final looksLikeEmail = RegExp(
       r'^[^@\s]+@[^@\s.]+\.[^@\s]+$',
     ).hasMatch(text);
-    if (!looksLikeEmail) return 'That does not look like an email address.';
+    if (!looksLikeEmail) return context.t(SiteText.betaInvalidEmail);
     return null;
   }
 
@@ -63,6 +65,9 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
 
     final entered = _controller.text.trim();
 
+    // The mail itself stays English whatever the visitor is reading: it
+    // lands in one studio inbox, and a uniform subject line is what makes
+    // those requests findable.
     final subject = '${widget.appName} — Android beta access request';
     final body =
         '${widget.appName} — Android closed test (Google Play)\n\n'
@@ -133,10 +138,10 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
                 size: 22,
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Join the Android Beta',
-                  style: TextStyle(
+                  context.t(SiteText.betaTitle),
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -147,14 +152,13 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
                 onPressed: () => Navigator.of(context).maybePop(),
                 icon: const Icon(Icons.close_rounded),
                 color: AppColors.textMuted,
-                tooltip: 'Close',
+                tooltip: context.t(SiteText.actionClose),
               ),
             ],
           ),
           const SizedBox(height: 14),
           Text(
-            'Enter the Google account email address you use on your Android '
-            'device to request access to the ${widget.appName} beta.',
+            context.t(SiteText.betaBody, params: {'app': widget.appName}),
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
@@ -199,7 +203,7 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
             child: TextButton.icon(
               onPressed: configured ? _submit : null,
               icon: const Icon(Icons.mail_outline_rounded, size: 17),
-              label: const Text('Request Beta Access'),
+              label: Text(context.t(SiteText.betaSubmit)),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.background,
                 backgroundColor: AppColors.accent,
@@ -217,10 +221,9 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
             ),
           ),
           const SizedBox(height: 14),
-          const Text(
-            'Your address is used only to add you to the Google Play tester '
-            'list. It is not stored on this site.',
-            style: TextStyle(
+          Text(
+            context.t(SiteText.betaPrivacy),
+            style: const TextStyle(
               color: AppColors.textMuted,
               fontSize: 11.5,
               height: 1.5,
@@ -236,17 +239,17 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Row(
+        Row(
           children: [
-            Icon(
+            const Icon(
               Icons.check_circle_outline_rounded,
               color: AppColors.statusAvailable,
               size: 22,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
-              'Almost there',
-              style: TextStyle(
+              context.t(SiteText.betaSentTitle),
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
@@ -255,11 +258,9 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
           ],
         ),
         const SizedBox(height: 14),
-        const Text(
-          'Your mail app should have opened with the request ready to send. '
-          'Once we add your account to the tester list, Google Play will give '
-          'you access to the closed test.',
-          style: TextStyle(
+        Text(
+          context.t(SiteText.betaSentBody),
+          style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 14,
             height: 1.6,
@@ -271,7 +272,7 @@ class _BetaAccessDialogState extends State<BetaAccessDialog> {
           child: TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
             style: TextButton.styleFrom(foregroundColor: AppColors.accent),
-            child: const Text('Done'),
+            child: Text(context.t(SiteText.betaDone)),
           ),
         ),
       ],
@@ -294,10 +295,9 @@ class _NotLiveNotice extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.cardBorder),
       ),
-      child: const Text(
-        'Beta sign-up is not open yet. In the meantime the app is available '
-        'on the App Store.',
-        style: TextStyle(
+      child: Text(
+        context.t(SiteText.betaClosed),
+        style: const TextStyle(
           color: AppColors.textMuted,
           fontSize: 12.5,
           height: 1.5,

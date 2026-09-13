@@ -19,7 +19,10 @@ import 'package:catlab_studios/shared/widgets/app_card.dart';
 import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
 /// Sets a wide viewport so the desktop layout is what gets exercised.
-Future<void> _pumpSite(WidgetTester tester, {Size size = const Size(1440, 2400)}) async {
+Future<void> _pumpSite(
+  WidgetTester tester, {
+  Size size = const Size(1440, 2400),
+}) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -46,7 +49,19 @@ void main() {
     // 1→2 and 2→3 column boundaries, tablet portrait/landscape, MacBook and
     // wide desktop.
     for (final width in <double>[
-      320, 390, 430, 559, 561, 768, 834, 899, 901, 1024, 1280, 1440, 1920,
+      320,
+      390,
+      430,
+      559,
+      561,
+      768,
+      834,
+      899,
+      901,
+      1024,
+      1280,
+      1440,
+      1920,
     ]) {
       testWidgets('lays out without overflow at ${width.toInt()}px', (
         tester,
@@ -67,7 +82,9 @@ void main() {
       await tester.tap(games.first, warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 400));
 
-      final gameCount = AppProjectsRepository.byCategory(AppCategory.games).length;
+      final gameCount = AppProjectsRepository.byCategory(
+        AppCategory.games,
+      ).length;
       expect(
         find.byType(AppCard, skipOffstage: false),
         findsNWidgets(gameCount),
@@ -125,8 +142,9 @@ void main() {
       tester,
     ) async {
       // Medical ProCat is a concept with nothing public to link to.
-      final concept = AppProjectsRepository.all
-          .firstWhere((a) => a.id == 'medical_procat');
+      final concept = AppProjectsRepository.all.firstWhere(
+        (a) => a.id == 'medical_procat',
+      );
       expect(concept.hasLinks, isFalse);
 
       await pumpDetail(tester, concept);
@@ -138,8 +156,9 @@ void main() {
     testWidgets('HB Cure shows all three verified destinations', (
       tester,
     ) async {
-      final hbCure =
-          AppProjectsRepository.all.firstWhere((a) => a.id == 'hb_cure');
+      final hbCure = AppProjectsRepository.all.firstWhere(
+        (a) => a.id == 'hb_cure',
+      );
       await pumpDetail(tester, hbCure);
 
       expect(find.text('Download on the App Store'), findsOneWidget);
@@ -151,8 +170,9 @@ void main() {
     testWidgets('Feline Alarm separates iOS from the Android beta', (
       tester,
     ) async {
-      final felineAlarm =
-          AppProjectsRepository.all.firstWhere((a) => a.id == 'feline_alarm');
+      final felineAlarm = AppProjectsRepository.all.firstWhere(
+        (a) => a.id == 'feline_alarm',
+      );
       await pumpDetail(tester, felineAlarm);
 
       expect(find.text('Beta · Closed Test'), findsOneWidget);
@@ -221,11 +241,17 @@ void main() {
 
   group('android beta flow', () {
     test('requests go to the studio address on our own domain', () {
-      expect(BetaAccessConfig.isConfigured, isTrue,
-          reason: 'beta sign-up should be live');
+      expect(
+        BetaAccessConfig.isConfigured,
+        isTrue,
+        reason: 'beta sign-up should be live',
+      );
       expect(BetaAccessConfig.requestEmail, 'beta@catlabstudios.com');
-      expect(BetaAccessConfig.requestEmail, endsWith('@catlabstudios.com'),
-          reason: 'never route beta requests to a personal mailbox');
+      expect(
+        BetaAccessConfig.requestEmail,
+        endsWith('@catlabstudios.com'),
+        reason: 'never route beta requests to a personal mailbox',
+      );
     });
 
     test('no personal mailbox is compiled into the public build', () {
@@ -244,8 +270,9 @@ void main() {
               entity.path.endsWith('.json'))) {
             continue;
           }
-          final matches = RegExp(r'[\w.+-]+@[\w.-]+\.\w+')
-              .allMatches(entity.readAsStringSync());
+          final matches = RegExp(
+            r'[\w.+-]+@[\w.-]+\.\w+',
+          ).allMatches(entity.readAsStringSync());
           for (final match in matches) {
             final address = match.group(0)!;
             if (allowedDomains.any(address.endsWith)) continue;
@@ -255,9 +282,13 @@ void main() {
         }
       }
 
-      expect(offenders, isEmpty,
-          reason: 'unexpected address in a public build:\n'
-              '${offenders.join('\n')}');
+      expect(
+        offenders,
+        isEmpty,
+        reason:
+            'unexpected address in a public build:\n'
+            '${offenders.join('\n')}',
+      );
     });
 
     testWidgets('a submitted request carries the tester Google account', (
@@ -293,8 +324,11 @@ void main() {
 
       // A mailto query is not form data: "+" would arrive as a literal plus,
       // so spaces must be percent-encoded.
-      expect(uri.query.contains('+'), isFalse,
-          reason: 'spaces must be %20, not "+", in a mailto URL');
+      expect(
+        uri.query.contains('+'),
+        isFalse,
+        reason: 'spaces must be %20, not "+", in a mailto URL',
+      );
 
       // The confirmation state only appears once the request actually went out.
       expect(find.text('Almost there'), findsOneWidget);
@@ -311,7 +345,10 @@ void main() {
       await tester.pump();
 
       expect(find.text('Join the Android Beta'), findsOneWidget);
-      expect(find.textContaining('Google account email address'), findsOneWidget);
+      expect(
+        find.textContaining('Google account email address'),
+        findsOneWidget,
+      );
 
       expect(find.text('Request Beta Access'), findsOneWidget);
 
@@ -340,15 +377,17 @@ void main() {
           (a) => a.name.toLowerCase().contains('schnurrpurr'),
         ),
         isFalse,
-        reason: 'a pillow has no status, platform or category — it belongs in '
+        reason:
+            'a pillow has no status, platform or category — it belongs in '
             'the connected-products section',
       );
       expect(ConnectedProductsRepository.all, isNotEmpty);
     });
 
     test('the product links to its real site and to PurrLove', () {
-      final product = ConnectedProductsRepository.all
-          .firstWhere((p) => p.id == 'schnurrpurr');
+      final product = ConnectedProductsRepository.all.firstWhere(
+        (p) => p.id == 'schnurrpurr',
+      );
       expect(product.links.single.url, 'https://schnurrpurr.com');
       expect(product.companionAppId, 'purrlove');
       // The companion id must resolve, or the cross-link silently does nothing.
@@ -366,8 +405,11 @@ void main() {
         final copy = '${product.description} ${product.highlights.join(' ')}'
             .toLowerCase();
         for (final claim in ['bluetooth', 'connect', 'control', 'pair']) {
-          expect(copy.contains(claim), isFalse,
-              reason: '${product.name} copy claims "$claim"');
+          expect(
+            copy.contains(claim),
+            isFalse,
+            reason: '${product.name} copy claims "$claim"',
+          );
         }
       }
     });
@@ -375,8 +417,11 @@ void main() {
     test('product images are real assets under products/', () {
       for (final product in ConnectedProductsRepository.all) {
         expect(product.imageAsset, startsWith('assets/images/products/'));
-        expect(File(product.imageAsset).existsSync(), isTrue,
-            reason: '${product.imageAsset} is missing');
+        expect(
+          File(product.imageAsset).existsSync(),
+          isTrue,
+          reason: '${product.imageAsset} is missing',
+        );
       }
     });
 
@@ -391,32 +436,54 @@ void main() {
 
   group('PurrLove and Cat Purr Relax are one app', () {
     test('the Play listing name is stated, not split into a second entry', () {
-      final purrlove =
-          AppProjectsRepository.all.firstWhere((a) => a.id == 'purrlove');
-      final play = purrlove.links
-          .firstWhere((l) => l.kind == AppLinkKind.playStore);
-      expect(play.displayLongLabel, contains('Cat Purr Relax'));
+      final purrlove = AppProjectsRepository.all.firstWhere(
+        (a) => a.id == 'purrlove',
+      );
+      final play = purrlove.links.firstWhere(
+        (l) => l.kind == AppLinkKind.playStore,
+      );
+      // Stated in every language: a German visitor needs the same warning
+      // that the Play listing carries a different name.
+      for (final text in play.displayLongLabel.values.values) {
+        expect(text, contains('Cat Purr Relax'));
+      }
       expect(
-        AppProjectsRepository.all
-            .where((a) => a.name.toLowerCase().contains('cat purr relax')),
+        AppProjectsRepository.all.where(
+          (a) => a.name.toLowerCase().contains('cat purr relax'),
+        ),
         isEmpty,
         reason: 'the same app must not appear twice',
       );
     });
 
     test('PurrLove names the SchnurrPurr set', () {
-      final purrlove =
-          AppProjectsRepository.all.firstWhere((a) => a.id == 'purrlove');
+      final purrlove = AppProjectsRepository.all.firstWhere(
+        (a) => a.id == 'purrlove',
+      );
       expect(purrlove.companionProductNote, isNotNull);
-      expect(purrlove.companionProductNote, contains('SchnurrPurr'));
+      for (final text in purrlove.companionProductNote!.values.values) {
+        expect(text, contains('SchnurrPurr'));
+      }
     });
   });
 
   group('portfolio data', () {
     test('every project has a non-empty tagline and description', () {
       for (final app in AppProjectsRepository.all) {
-        expect(app.tagline, isNotEmpty, reason: '${app.name} tagline');
-        expect(app.description, isNotEmpty, reason: '${app.name} description');
+        for (final entry in app.tagline.values.entries) {
+          expect(
+            entry.value,
+            isNotEmpty,
+            reason: '${app.name} tagline (${entry.key})',
+          );
+        }
+        for (final entry in app.description.values.entries) {
+          expect(
+            entry.value,
+            isNotEmpty,
+            reason: '${app.name} description (${entry.key})',
+          );
+        }
       }
     });
 
@@ -437,7 +504,9 @@ void main() {
     });
 
     test('icon assets point into the app_icons folder', () {
-      for (final app in AppProjectsRepository.all.where((a) => a.hasIconAsset)) {
+      for (final app in AppProjectsRepository.all.where(
+        (a) => a.hasIconAsset,
+      )) {
         expect(
           app.iconAsset,
           startsWith('assets/images/app_icons/'),
@@ -447,15 +516,18 @@ void main() {
     });
 
     test('exactly the three flagship apps are featured', () {
-      expect(
-        AppProjectsRepository.featured.map((a) => a.id).toSet(),
-        {'hb_cure', 'master_chat', 'palettenfuchs'},
-      );
+      expect(AppProjectsRepository.featured.map((a) => a.id).toSet(), {
+        'hb_cure',
+        'master_chat',
+        'palettenfuchs',
+      });
     });
 
     test('byCategory filters, and every category is populated', () {
-      expect(AppProjectsRepository.byCategory(null).length,
-          AppProjectsRepository.all.length);
+      expect(
+        AppProjectsRepository.byCategory(null).length,
+        AppProjectsRepository.all.length,
+      );
       for (final category in AppCategory.values) {
         expect(
           AppProjectsRepository.byCategory(category),

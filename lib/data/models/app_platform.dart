@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 
 /// A platform a project actually ships on.
 ///
@@ -7,6 +8,7 @@ import 'package:catlab_studios/core/constants/app_colors.dart';
 /// a configured production bundle id. A Flutter project having an `ios/` folder
 /// is not, on its own, enough.
 enum AppPlatform {
+  // Platform names are proper nouns: the same word in every language.
   ios('iOS', Icons.apple_rounded),
   android('Android', Icons.android_rounded),
   web('Web', Icons.language_rounded),
@@ -26,16 +28,27 @@ enum AppPlatform {
 /// AI-hint: Only set a stage when platforms genuinely differ — an all-Available
 /// map is noise on the card.
 enum PlatformStage {
-  available('Available', 'Available', AppColors.statusAvailable),
-  beta('Beta', 'Beta · Closed Test', AppColors.statusInDevelopment);
+  available(
+    LocalizedText({'en': 'Available', 'de': 'Verfügbar'}),
+    LocalizedText({'en': 'Available', 'de': 'Verfügbar'}),
+    AppColors.statusAvailable,
+  ),
+  beta(
+    LocalizedText({'en': 'Beta', 'de': 'Beta'}),
+    LocalizedText({
+      'en': 'Beta · Closed Test',
+      'de': 'Beta · Geschlossener Test',
+    }),
+    AppColors.statusInDevelopment,
+  );
 
   const PlatformStage(this.shortLabel, this.detailLabel, this.color);
 
   /// Fits next to an icon on a compact card.
-  final String shortLabel;
+  final LocalizedText shortLabel;
 
   /// Spelled out in the detail sheet, where there is room.
-  final String detailLabel;
+  final LocalizedText detailLabel;
 
   final Color color;
 }

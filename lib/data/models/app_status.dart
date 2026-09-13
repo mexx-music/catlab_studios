@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 
 /// Lifecycle stage of a CatLab Studios app.
 ///
@@ -9,22 +10,37 @@ import 'package:catlab_studios/core/constants/app_colors.dart';
 /// AI-hint: Add a new stage here and give it a colour — nothing else changes.
 enum AppStatus {
   /// Publicly released — reachable through a store listing or a stable build.
-  available('Available', AppColors.statusAvailable),
+  available(
+    LocalizedText({'en': 'Available', 'de': 'Verfügbar'}),
+    AppColors.statusAvailable,
+  ),
 
   /// Feature-complete enough to use, still being polished before release.
-  advanced('Advanced', AppColors.statusAdvanced),
+  advanced(
+    LocalizedText({'en': 'Advanced', 'de': 'Fortgeschritten'}),
+    AppColors.statusAdvanced,
+  ),
 
   /// Actively built, core flows work, not yet feature-complete.
-  inDevelopment('In Development', AppColors.statusInDevelopment),
+  inDevelopment(
+    LocalizedText({'en': 'In Development', 'de': 'In Entwicklung'}),
+    AppColors.statusInDevelopment,
+  ),
 
   /// A working proof of concept — playable or usable, but early.
-  prototype('Prototype', AppColors.statusPrototype),
+  prototype(
+    LocalizedText({'en': 'Prototype', 'de': 'Prototyp'}),
+    AppColors.statusPrototype,
+  ),
 
   /// Scoped and designed, implementation not started.
-  concept('Concept', AppColors.statusConcept);
+  concept(
+    LocalizedText({'en': 'Concept', 'de': 'Konzept'}),
+    AppColors.statusConcept,
+  );
 
   const AppStatus(this.label, this.color);
 
-  final String label;
+  final LocalizedText label;
   final Color color;
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/models/app_category.dart';
 import 'package:catlab_studios/data/models/app_link.dart';
 import 'package:catlab_studios/data/models/app_platform.dart';
@@ -36,10 +37,10 @@ class AppProject {
   final String name;
 
   /// One line, shown on the card.
-  final String tagline;
+  final LocalizedText tagline;
 
   /// Two or three sentences, shown in the detail sheet.
-  final String description;
+  final LocalizedText description;
 
   /// Fallback glyph used when [iconAsset] is null.
   final IconData icon;
@@ -51,7 +52,7 @@ class AppProject {
   final AppCategory category;
 
   /// Richer display label, e.g. 'Health · Device Control'.
-  final String categoryLabel;
+  final LocalizedText categoryLabel;
 
   final AppStatus status;
   final List<AppPlatform> platforms;
@@ -63,11 +64,11 @@ class AppProject {
   final List<AppLink> links;
 
   /// Short factual bullets for the detail sheet.
-  final List<String> highlights;
+  final List<LocalizedText> highlights;
 
   /// Set only where a physical product from [ConnectedProductsRepository]
   /// belongs to this app, so the detail sheet can name that relationship.
-  final String? companionProductNote;
+  final LocalizedText? companionProductNote;
 
   /// Gets a larger card in the portfolio grid.
   final bool featured;

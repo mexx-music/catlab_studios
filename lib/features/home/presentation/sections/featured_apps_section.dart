@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
 import 'package:catlab_studios/data/models/app_category.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
@@ -62,7 +64,7 @@ class _FeaturedAppsSectionState extends State<FeaturedAppsSection> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Our Apps',
+            context.t(SiteText.portfolioTitle),
             style: theme.textTheme.displayMedium?.copyWith(
               fontSize: isNarrow ? 30 : 40,
             ),
@@ -71,9 +73,10 @@ class _FeaturedAppsSectionState extends State<FeaturedAppsSection> {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: Text(
-              '${widget.apps.length} projects across AI, business, health, '
-              'logistics, games and everyday life — at every stage from '
-              'shipped to concept.',
+              context.t(
+                SiteText.portfolioIntro,
+                params: {'count': '${widget.apps.length}'},
+              ),
               style: theme.textTheme.bodyLarge,
             ),
           ),
@@ -88,7 +91,7 @@ class _FeaturedAppsSectionState extends State<FeaturedAppsSection> {
 
           // ── Featured row (unfiltered view only) ──────────────────────────
           if (!_isFiltered) ...[
-            const _RowLabel('Flagship projects'),
+            _RowLabel(context.t(SiteText.portfolioFlagship)),
             const SizedBox(height: 16),
             LayoutBuilder(
               builder: (context, constraints) {
@@ -105,7 +108,7 @@ class _FeaturedAppsSectionState extends State<FeaturedAppsSection> {
               },
             ),
             SizedBox(height: isNarrow ? 36 : 48),
-            const _RowLabel('More from the studio'),
+            _RowLabel(context.t(SiteText.portfolioMore)),
             const SizedBox(height: 16),
           ],
 
@@ -220,13 +223,13 @@ class _CategoryFilterRow extends StatelessWidget {
       runSpacing: 10,
       children: [
         _FilterChip(
-          label: 'All',
+          label: context.t(SiteText.filterAll),
           active: selected == null,
           onTap: () => onSelected(null),
         ),
         for (final category in AppProjectsRepository.usedCategories)
           _FilterChip(
-            label: category.label,
+            label: context.t(category.label),
             active: selected == category,
             onTap: () => onSelected(category),
           ),
@@ -277,8 +280,9 @@ class _FilterChipState extends State<_FilterChip> {
             border: Border.all(
               color: active
                   ? AppColors.accent.withAlpha(150)
-                  : (_hovered ? AppColors.primary.withAlpha(120)
-                      : AppColors.cardBorder),
+                  : (_hovered
+                        ? AppColors.primary.withAlpha(120)
+                        : AppColors.cardBorder),
             ),
           ),
           child: Text(

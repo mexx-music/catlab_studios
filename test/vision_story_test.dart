@@ -17,7 +17,8 @@ import 'package:catlab_studios/shared/widgets/app_detail_sheet.dart';
 
 final VisionStory _story = businessBrainStory;
 
-String _headline(int index) => _story.scenes[index].headline;
+// Tests run in the fallback locale, so the English source is what renders.
+String _headline(int index) => _story.scenes[index].headline.source;
 
 /// Long enough for the scene switcher to finish and drop the outgoing scene,
 /// short enough that it never crosses a scene boundary on its own.
@@ -82,7 +83,6 @@ Future<void> _showDetailSheet(WidgetTester tester, AppProject project) async {
   await tester.pump();
 }
 
-
 /// Paints one scene's visual in isolation and returns the pixels.
 ///
 /// Comparing two of these is how the reduced-motion promise gets checked for
@@ -125,10 +125,12 @@ Future<Uint8List> _paintVisual(
   return bytes!;
 }
 
-
 /// Renders one portfolio card at a given grid column width.
 Future<void> _showCard(
-    WidgetTester tester, AppProject project, double width) async {
+  WidgetTester tester,
+  AppProject project,
+  double width,
+) async {
   tester.view.physicalSize = const Size(1400, 900);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
@@ -155,8 +157,11 @@ void main() {
     test('the pilot targets a project that actually exists', () {
       final ids = AppProjectsRepository.all.map((p) => p.id).toSet();
       for (final story in VisionStoriesRepository.all) {
-        expect(ids, contains(story.projectId),
-            reason: 'a story must point at a real portfolio entry');
+        expect(
+          ids,
+          contains(story.projectId),
+          reason: 'a story must point at a real portfolio entry',
+        );
       }
     });
 
@@ -168,8 +173,9 @@ void main() {
     });
 
     testWidgets('Business Brain shows the vision CTA', (tester) async {
-      final project = AppProjectsRepository.all
-          .firstWhere((p) => p.id == 'universal_business');
+      final project = AppProjectsRepository.all.firstWhere(
+        (p) => p.id == 'universal_business',
+      );
       await _showDetailSheet(tester, project);
 
       // Two entry points: the explainer block, and a button in the action
@@ -182,35 +188,40 @@ void main() {
       expect(find.text(project.name), findsOneWidget);
     });
 
-    testWidgets('the action row carries the vision button beside the demo link',
-        (tester) async {
-      final project = AppProjectsRepository.all
-          .firstWhere((p) => p.id == 'universal_business');
-      await _showDetailSheet(tester, project);
+    testWidgets(
+      'the action row carries the vision button beside the demo link',
+      (tester) async {
+        final project = AppProjectsRepository.all.firstWhere(
+          (p) => p.id == 'universal_business',
+        );
+        await _showDetailSheet(tester, project);
 
-      // Both actions live in the same row, in that order.
-      final row = find.ancestor(
-        of: find.text('Explore the Vision'),
-        matching: find.byType(Wrap),
+        // Both actions live in the same row, in that order.
+        final row = find.ancestor(
+          of: find.text('Explore the Vision'),
+          matching: find.byType(Wrap),
+        );
+        expect(row, findsOneWidget);
+        expect(
+          find.descendant(of: row, matching: find.textContaining('Open Demo')),
+          findsOneWidget,
+        );
+
+        // And it opens the story rather than launching a link.
+        await tester.tap(find.text('Explore the Vision'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(find.byType(VisionStoryPlayer), findsOneWidget);
+        expect(find.text(_headline(0)), findsOneWidget);
+      },
+    );
+
+    testWidgets('the portfolio card carries the vision action too', (
+      tester,
+    ) async {
+      final project = AppProjectsRepository.all.firstWhere(
+        (p) => p.id == 'universal_business',
       );
-      expect(row, findsOneWidget);
-      expect(
-        find.descendant(of: row, matching: find.textContaining('Open Demo')),
-        findsOneWidget,
-      );
-
-      // And it opens the story rather than launching a link.
-      await tester.tap(find.text('Explore the Vision'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(find.byType(VisionStoryPlayer), findsOneWidget);
-      expect(find.text(_headline(0)), findsOneWidget);
-    });
-
-    testWidgets('the portfolio card carries the vision action too',
-        (tester) async {
-      final project = AppProjectsRepository.all
-          .firstWhere((p) => p.id == 'universal_business');
       await _showCard(tester, project, 420);
 
       // The demo link keeps its full label — the vision button must not
@@ -226,10 +237,12 @@ void main() {
       expect(find.text(_headline(0)), findsOneWidget);
     });
 
-    testWidgets('a narrow card keeps the action but drops its label',
-        (tester) async {
-      final project = AppProjectsRepository.all
-          .firstWhere((p) => p.id == 'universal_business');
+    testWidgets('a narrow card keeps the action but drops its label', (
+      tester,
+    ) async {
+      final project = AppProjectsRepository.all.firstWhere(
+        (p) => p.id == 'universal_business',
+      );
       // A four-column desktop card: too narrow for two labelled buttons.
       await _showCard(tester, project, 333);
 
@@ -241,21 +254,37 @@ void main() {
     });
 
     testWidgets('cards fit at every grid width', (tester) async {
-      final project = AppProjectsRepository.all
-          .firstWhere((p) => p.id == 'universal_business');
+      final project = AppProjectsRepository.all.firstWhere(
+        (p) => p.id == 'universal_business',
+      );
       // Every card width the grid actually produces, from a 320px phone in
       // one column to a 1920px desktop in four.
-      for (final width in <double>[280, 300, 312, 333, 340, 350, 415, 453, 520]) {
+      for (final width in <double>[
+        280,
+        300,
+        312,
+        333,
+        340,
+        350,
+        415,
+        453,
+        520,
+      ]) {
         await _showCard(tester, project, width);
-        expect(tester.takeException(), isNull,
-            reason: 'card overflowed at ${width.toInt()}px');
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'card overflowed at ${width.toInt()}px',
+        );
       }
     });
 
-    testWidgets('a card without a story shows no vision action',
-        (tester) async {
-      final project =
-          AppProjectsRepository.all.firstWhere((p) => p.id == 'hb_cure');
+    testWidgets('a card without a story shows no vision action', (
+      tester,
+    ) async {
+      final project = AppProjectsRepository.all.firstWhere(
+        (p) => p.id == 'hb_cure',
+      );
       await _showCard(tester, project, 420);
       expect(find.byTooltip('Explore the Vision'), findsNothing);
       expect(find.text('Vision'), findsNothing);
@@ -266,8 +295,11 @@ void main() {
         final matches = AppProjectsRepository.all.where((p) => p.id == id);
         if (matches.isEmpty) continue;
         await _showDetailSheet(tester, matches.first);
-        expect(find.textContaining('Explore the Vision'), findsNothing,
-            reason: '$id has no vision story and must not advertise one');
+        expect(
+          find.textContaining('Explore the Vision'),
+          findsNothing,
+          reason: '$id has no vision story and must not advertise one',
+        );
       }
     });
   });
@@ -288,26 +320,37 @@ void main() {
     test('every forward-looking claim names what exists today', () {
       for (final scene in _story.scenes) {
         if (scene.stage == VisionStage.vision && scene.points.isNotEmpty) {
-          expect(scene.stageNote, isNotNull,
-              reason: '"${scene.id}" makes vision claims with no today note');
+          expect(
+            scene.stageNote,
+            isNotNull,
+            reason: '"${scene.id}" makes vision claims with no today note',
+          );
         }
         if (scene.stage == VisionStage.today) {
-          expect(scene.stageNote, isNull,
-              reason: 'a today scene needs no counterweight');
+          expect(
+            scene.stageNote,
+            isNull,
+            reason: 'a today scene needs no counterweight',
+          );
         }
       }
     });
 
-    testWidgets('the vision badge is on screen for a vision scene',
-        (tester) async {
+    testWidgets('the vision badge is on screen for a vision scene', (
+      tester,
+    ) async {
       await _openStory(tester);
-      final visionIndex =
-          _story.scenes.indexWhere((s) => s.stage == VisionStage.vision);
-      await _tapTooltip(tester, _story.scenes[visionIndex].kicker);
+      final visionIndex = _story.scenes.indexWhere(
+        (s) => s.stage == VisionStage.vision,
+      );
+      await _tapTooltip(tester, _story.scenes[visionIndex].kicker.source);
 
       expect(find.text('VISION'), findsOneWidget);
       expect(find.text('VISION STORY'), findsOneWidget);
-      expect(find.text(_story.scenes[visionIndex].stageNote!), findsOneWidget);
+      expect(
+        find.text(_story.scenes[visionIndex].stageNote!.source),
+        findsOneWidget,
+      );
     });
   });
 
@@ -360,8 +403,9 @@ void main() {
       expect(find.text('02 / 07'), findsOneWidget);
     });
 
-    testWidgets('previous steps back a scene near a scene start',
-        (tester) async {
+    testWidgets('previous steps back a scene near a scene start', (
+      tester,
+    ) async {
       await _openStory(tester);
       await _tapTooltip(tester, 'Next scene');
       await _tapTooltip(tester, 'Next scene');
@@ -372,8 +416,9 @@ void main() {
       expect(find.text('02 / 07'), findsOneWidget);
     });
 
-    testWidgets('previous replays the current scene once it is under way',
-        (tester) async {
+    testWidgets('previous replays the current scene once it is under way', (
+      tester,
+    ) async {
       await _openStory(tester);
       await _tapTooltip(tester, 'Next scene');
       // Past the 35% mark of a 12s scene.
@@ -386,15 +431,16 @@ void main() {
     testWidgets('a segment jumps straight to its scene', (tester) async {
       await _openStory(tester);
       // Each segment is tooltipped with its scene's kicker.
-      await _tapTooltip(tester, _story.scenes[3].kicker);
+      await _tapTooltip(tester, _story.scenes[3].kicker.source);
       expect(find.text(_headline(3)), findsOneWidget);
       expect(find.text('04 / 07'), findsOneWidget);
     });
 
-    testWidgets('the scrubber actually fills as the story advances',
-        (tester) async {
+    testWidgets('the scrubber actually fills as the story advances', (
+      tester,
+    ) async {
       await _openStory(tester);
-      await _tapTooltip(tester, _story.scenes[3].kicker);
+      await _tapTooltip(tester, _story.scenes[3].kicker.source);
 
       final fills = tester
           .widgetList<FractionallySizedBox>(find.byType(FractionallySizedBox))
@@ -411,8 +457,9 @@ void main() {
       }
     });
 
-    testWidgets('manual navigation invalidates the previous scene timer',
-        (tester) async {
+    testWidgets('manual navigation invalidates the previous scene timer', (
+      tester,
+    ) async {
       await _openStory(tester);
       // Sit just short of scene one's natural end, then jump away.
       await tester.pump(_story.scenes[0].duration - const Duration(seconds: 1));
@@ -468,8 +515,9 @@ void main() {
 
   // ── Reduced motion ───────────────────────────────────────────────────────
   group('reduced motion', () {
-    testWidgets('scene copy is shown outright instead of fading in',
-        (tester) async {
+    testWidgets('scene copy is shown outright instead of fading in', (
+      tester,
+    ) async {
       await _openStory(tester, reducedMotion: true);
       expect(
         find.ancestor(
@@ -482,20 +530,22 @@ void main() {
       expect(find.text(_headline(0)), findsOneWidget);
     });
 
-    testWidgets('the story still plays and stays fully readable',
-        (tester) async {
+    testWidgets('the story still plays and stays fully readable', (
+      tester,
+    ) async {
       await _openStory(tester, reducedMotion: true);
       await tester.pump(_story.scenes[0].duration);
       await tester.pump(_settle);
       expect(find.text(_headline(1)), findsOneWidget);
       for (final point in _story.scenes[1].points) {
-        expect(find.text(point), findsOneWidget);
+        expect(find.text(point.source), findsOneWidget);
       }
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('animations are staged normally without the preference',
-        (tester) async {
+    testWidgets('animations are staged normally without the preference', (
+      tester,
+    ) async {
       await _openStory(tester);
       expect(
         find.ancestor(
@@ -515,38 +565,57 @@ void main() {
           tester,
           scene,
           const VisionVisualState(
-              entrance: 0, progress: 0, reducedMotion: true),
+            entrance: 0,
+            progress: 0,
+            reducedMotion: true,
+          ),
         );
         final atEnd = await _paintVisual(
           tester,
           scene,
           const VisionVisualState(
-              entrance: 1, progress: 1, reducedMotion: true),
+            entrance: 1,
+            progress: 1,
+            reducedMotion: true,
+          ),
         );
-        expect(atEnd, equals(atStart),
-            reason: 'scene "${scene.id}" still animates under reduced motion');
+        expect(
+          atEnd,
+          equals(atStart),
+          reason: 'scene "${scene.id}" still animates under reduced motion',
+        );
       }
     });
 
-    testWidgets('and shows its finished state rather than an empty box',
-        (tester) async {
+    testWidgets('and shows its finished state rather than an empty box', (
+      tester,
+    ) async {
       for (final scene in _story.scenes) {
         final reduced = await _paintVisual(
           tester,
           scene,
           const VisionVisualState(
-              entrance: 0, progress: 0, reducedMotion: true),
+            entrance: 0,
+            progress: 0,
+            reducedMotion: true,
+          ),
         );
         final unbuilt = await _paintVisual(
           tester,
           scene,
           const VisionVisualState(
-              entrance: 0, progress: 0, reducedMotion: false),
+            entrance: 0,
+            progress: 0,
+            reducedMotion: false,
+          ),
         );
         // At t=0 an animated scene has barely drawn anything; the reduced
         // one must already be complete, so the two cannot match.
-        expect(reduced, isNot(equals(unbuilt)),
-            reason: 'scene "${scene.id}" renders nothing under reduced motion');
+        expect(
+          reduced,
+          isNot(equals(unbuilt)),
+          reason: 'scene "${scene.id}" renders nothing under reduced motion',
+        );
       }
     });
 
@@ -556,13 +625,19 @@ void main() {
         tester,
         scene,
         const VisionVisualState(
-            entrance: 0.2, progress: 0.07, reducedMotion: false),
+          entrance: 0.2,
+          progress: 0.07,
+          reducedMotion: false,
+        ),
       );
       final later = await _paintVisual(
         tester,
         scene,
         const VisionVisualState(
-            entrance: 1, progress: 0.8, reducedMotion: false),
+          entrance: 1,
+          progress: 0.8,
+          reducedMotion: false,
+        ),
       );
       expect(later, isNot(equals(early)));
     });
@@ -571,30 +646,34 @@ void main() {
   // ── Layout ───────────────────────────────────────────────────────────────
   group('responsive layout', () {
     for (final size in <Size>[
-      Size(320, 640),   // smallest phone we support
+      Size(320, 640), // smallest phone we support
       Size(360, 780),
-      Size(390, 844),   // iPhone
-      Size(430, 932),   // large phone
-      Size(768, 1024),  // iPad portrait
+      Size(390, 844), // iPhone
+      Size(430, 932), // large phone
+      Size(768, 1024), // iPad portrait
       Size(834, 1112),
-      Size(1024, 768),  // iPad landscape — short viewport
+      Size(1024, 768), // iPad landscape — short viewport
       Size(1280, 800),
       Size(1440, 900),
       Size(1920, 1080),
     ]) {
       testWidgets(
-          'every scene fits at ${size.width.toInt()}×${size.height.toInt()}',
-          (tester) async {
-        await _openStory(tester, size: size);
-        for (var i = 0; i < _story.sceneCount; i++) {
-          expect(tester.takeException(), isNull,
-              reason: 'scene ${i + 1} overflowed at ${size.width}px');
-          if (i < _story.sceneCount - 1) {
-            await _tapTooltip(tester, 'Next scene');
+        'every scene fits at ${size.width.toInt()}×${size.height.toInt()}',
+        (tester) async {
+          await _openStory(tester, size: size);
+          for (var i = 0; i < _story.sceneCount; i++) {
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: 'scene ${i + 1} overflowed at ${size.width}px',
+            );
+            if (i < _story.sceneCount - 1) {
+              await _tapTooltip(tester, 'Next scene');
+            }
           }
-        }
-        expect(tester.takeException(), isNull);
-      });
+          expect(tester.takeException(), isNull);
+        },
+      );
     }
   });
 }

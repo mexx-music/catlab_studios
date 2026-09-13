@@ -1,3 +1,5 @@
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+
 /// Filter buckets used by the portfolio section.
 ///
 /// A project has exactly one bucket so the filter row stays predictable; the
@@ -5,14 +7,14 @@
 /// project itself as `categoryLabel`.
 /// AI-hint: Keep this list short — the filter row must not wrap twice on mobile.
 enum AppCategory {
-  ai('AI'),
-  business('Business'),
-  health('Health'),
-  logistics('Logistics'),
-  games('Games'),
-  lifestyle('Lifestyle');
+  ai(LocalizedText({'en': 'AI', 'de': 'KI'})),
+  business(LocalizedText({'en': 'Business', 'de': 'Business'})),
+  health(LocalizedText({'en': 'Health', 'de': 'Gesundheit'})),
+  logistics(LocalizedText({'en': 'Logistics', 'de': 'Logistik'})),
+  games(LocalizedText({'en': 'Games', 'de': 'Spiele'})),
+  lifestyle(LocalizedText({'en': 'Lifestyle', 'de': 'Alltag'}));
 
   const AppCategory(this.label);
 
-  final String label;
+  final LocalizedText label;
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
 import 'package:catlab_studios/data/models/app_project.dart';
 import 'package:catlab_studios/features/vision/data/vision_stories_repository.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
@@ -112,7 +114,7 @@ class _AppCardState extends State<AppCard> {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                project.categoryLabel,
+                                context.t(project.categoryLabel),
                                 style: const TextStyle(
                                   color: AppColors.accent,
                                   fontSize: 10.5,
@@ -123,7 +125,10 @@ class _AppCardState extends State<AppCard> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 8),
-                              StatusBadge(status: project.status, compact: true),
+                              StatusBadge(
+                                status: project.status,
+                                compact: true,
+                              ),
                             ],
                           ),
                         ),
@@ -133,7 +138,7 @@ class _AppCardState extends State<AppCard> {
 
                     // ── Tagline (+ description when featured) ─────────────
                     Text(
-                      project.tagline,
+                      context.t(project.tagline),
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: featured ? 14.5 : 13,
@@ -151,8 +156,9 @@ class _AppCardState extends State<AppCard> {
                     // for an icon before anything is allowed to overflow.
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        final story =
-                            VisionStoriesRepository.forProject(project.id);
+                        final story = VisionStoriesRepository.forProject(
+                          project.id,
+                        );
                         final hasLink = project.hasLinks;
                         // Below this the two buttons plus the chips stop
                         // fitting side by side, and the vision button gives up
@@ -167,26 +173,34 @@ class _AppCardState extends State<AppCard> {
                         final labelled =
                             constraints.maxWidth >= (hasLink ? 302 : 150);
                         final tight =
-                            story != null && labelled && constraints.maxWidth < 380;
+                            story != null &&
+                            labelled &&
+                            constraints.maxWidth < 380;
 
                         return Row(
                           children: [
-                            // The only flexible child: the buttons keep their
-                            // natural width so a link label is never clipped.
-                            if (tight)
-                              const Spacer()
-                            else
-                              Expanded(
-                                child: PlatformChips(
-                                  platforms: project.platforms,
-                                  stages: project.platformStages,
-                                ),
+                            // The chips take their own small width, the
+                            // spacer pushes the actions to the trailing edge,
+                            // and only the link button flexes.
+                            if (!tight)
+                              PlatformChips(
+                                platforms: project.platforms,
+                                stages: project.platformStages,
                               ),
+                            const Spacer(),
                             if (hasLink) ...[
                               const SizedBox(width: 8),
-                              LinkButton(
-                                link: project.primaryLink!,
-                                filled: featured,
+                              // The heavy flex means the link takes the slack
+                              // before the spacer does, so it keeps its full
+                              // label whenever one fits — and ellipsises
+                              // instead of overflowing when a translation is
+                              // longer than the row can hold.
+                              Flexible(
+                                flex: 100,
+                                child: LinkButton(
+                                  link: project.primaryLink!,
+                                  filled: featured,
+                                ),
                               ),
                             ],
                             if (story != null) ...[
@@ -232,11 +246,12 @@ class _CardVisionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final name = context.t(story.ctaLabel);
     return Tooltip(
-      message: story.ctaLabel,
+      message: name,
       child: Semantics(
         button: true,
-        label: story.ctaLabel,
+        label: name,
         child: TextButton(
           onPressed: () => VisionStoryPlayer.open(context, story),
           style: TextButton.styleFrom(
@@ -261,10 +276,13 @@ class _CardVisionButton extends StatelessWidget {
               const Icon(Icons.auto_graph_rounded, size: 15),
               if (labelled) ...[
                 const SizedBox(width: 5),
-                const Text(
-                  'Vision',
+                Text(
+                  context.t(SiteText.visionCardLabel),
                   maxLines: 1,
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ],
@@ -288,19 +306,19 @@ class _DetailsHint extends StatelessWidget {
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
       opacity: hovered ? 1 : 0.55,
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Learn more',
-            style: TextStyle(
+            context.t(SiteText.actionLearnMore),
+            style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(width: 4),
-          Icon(
+          const SizedBox(width: 4),
+          const Icon(
             Icons.arrow_forward_rounded,
             size: 14,
             color: AppColors.textSecondary,

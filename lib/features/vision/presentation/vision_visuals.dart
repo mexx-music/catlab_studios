@@ -3,7 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
+import 'package:catlab_studios/features/vision/presentation/vision_diagram_text.dart';
 
 /// The drawn half of a vision story.
 ///
@@ -26,11 +28,20 @@ const double kEntranceFraction = 0.34;
 /// Scattered knowledge, reused across scenes 1 and 2 so the fragments the
 /// viewer saw drifting are literally the ones that get pulled into the core.
 const List<Offset> _fragments = [
-  Offset(-0.78, -0.52), Offset(-0.34, -0.74), Offset(0.22, -0.80),
-  Offset(0.68, -0.58), Offset(0.86, -0.14), Offset(0.72, 0.36),
-  Offset(0.34, 0.72), Offset(-0.16, 0.82), Offset(-0.58, 0.64),
-  Offset(-0.88, 0.22), Offset(-0.52, -0.16), Offset(0.44, -0.30),
-  Offset(0.18, 0.34), Offset(-0.28, 0.26),
+  Offset(-0.78, -0.52),
+  Offset(-0.34, -0.74),
+  Offset(0.22, -0.80),
+  Offset(0.68, -0.58),
+  Offset(0.86, -0.14),
+  Offset(0.72, 0.36),
+  Offset(0.34, 0.72),
+  Offset(-0.16, 0.82),
+  Offset(-0.58, 0.64),
+  Offset(-0.88, 0.22),
+  Offset(-0.52, -0.16),
+  Offset(0.44, -0.30),
+  Offset(0.18, 0.34),
+  Offset(-0.28, 0.26),
 ];
 
 /// Maps a global 0→1 value onto a sub-window, for staggering elements.
@@ -49,8 +60,14 @@ abstract final class _Ink {
   static const Color flag = AppColors.statusInDevelopment;
 }
 
-void _dot(Canvas canvas, Offset at, double radius, Color color, double alpha,
-    {double glow = 2.6}) {
+void _dot(
+  Canvas canvas,
+  Offset at,
+  double radius,
+  Color color,
+  double alpha, {
+  double glow = 2.6,
+}) {
   if (alpha <= 0.01) return;
   final a = alpha.clamp(0.0, 1.0);
   canvas.drawCircle(
@@ -64,8 +81,15 @@ void _dot(Canvas canvas, Offset at, double radius, Color color, double alpha,
 }
 
 /// A link that draws itself from [a] toward [b] as [t] runs 0 → 1.
-void _link(Canvas canvas, Offset a, Offset b, double t,
-    {Color color = _Ink.line, double width = 1.0, bool dashed = false}) {
+void _link(
+  Canvas canvas,
+  Offset a,
+  Offset b,
+  double t, {
+  Color color = _Ink.line,
+  double width = 1.0,
+  bool dashed = false,
+}) {
   if (t <= 0.01) return;
   final end = Offset.lerp(a, b, _ease(t))!;
   final paint = Paint()
@@ -94,11 +118,16 @@ void _pulse(Canvas canvas, Offset a, Offset b, double phase, Color color) {
   _dot(canvas, at, 2.4, color, math.sin(p * math.pi).clamp(0.0, 1.0));
 }
 
-void _label(Canvas canvas, Offset at, String text, double alpha,
-    {Color color = AppColors.textSecondary,
-    double size = 10.5,
-    FontWeight weight = FontWeight.w600,
-    TextDirection direction = TextDirection.ltr}) {
+void _label(
+  Canvas canvas,
+  Offset at,
+  String text,
+  double alpha, {
+  Color color = AppColors.textSecondary,
+  double size = 10.5,
+  FontWeight weight = FontWeight.w600,
+  TextDirection direction = TextDirection.ltr,
+}) {
   if (alpha <= 0.02) return;
   final painter = TextPainter(
     text: TextSpan(
@@ -161,10 +190,12 @@ class _Visual extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 Widget visionImpulse(BuildContext context, VisionVisualState state) =>
-    _Visual(_ImpulsePainter(state));
+    _Visual(_ImpulsePainter(state, context.t(VisionDiagramText.question)));
 
 class _ImpulsePainter extends _ScenePainter {
-  const _ImpulsePainter(super.state);
+  const _ImpulsePainter(super.state, this.question);
+
+  final String question;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -177,8 +208,13 @@ class _ImpulsePainter extends _ScenePainter {
       final drift = still
           ? Offset.zero
           : Offset(0, math.sin(progress * math.pi * 2 + i) * s * 0.012);
-      _dot(canvas, p(size, _fragments[i].dx, _fragments[i].dy, s) + drift, 2.6,
-          _Ink.node, t * 0.75);
+      _dot(
+        canvas,
+        p(size, _fragments[i].dx, _fragments[i].dy, s) + drift,
+        2.6,
+        _Ink.node,
+        t * 0.75,
+      );
     }
 
     // The question itself: one impulse, waiting.
@@ -191,19 +227,32 @@ class _ImpulsePainter extends _ScenePainter {
           Paint()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 1
-            ..color = _Ink.focus
-                .withValues(alpha: (1 - phase) * 0.22 * entrance),
+            ..color = _Ink.focus.withValues(
+              alpha: (1 - phase) * 0.22 * entrance,
+            ),
         );
       }
     }
-    _dot(canvas, centre, 6 + 2 * _ease(entrance), _Ink.focus, entrance,
-        glow: 4);
+    _dot(
+      canvas,
+      centre,
+      6 + 2 * _ease(entrance),
+      _Ink.focus,
+      entrance,
+      glow: 4,
+    );
     // The caption is an echo of the headline, so it is the first thing to go
     // when the canvas is too small to hold it clear of the rings.
     if (s > 95) {
-      _label(canvas, centre + Offset(0, s * 0.46), 'what should I do next?',
-          _step(entrance, 0.45, 1.0) * 0.8,
-          color: AppColors.textMuted, size: 11, weight: FontWeight.w500);
+      _label(
+        canvas,
+        centre + Offset(0, s * 0.46),
+        question,
+        _step(entrance, 0.45, 1.0) * 0.8,
+        color: AppColors.textMuted,
+        size: 11,
+        weight: FontWeight.w500,
+      );
     }
   }
 }
@@ -212,13 +261,20 @@ class _ImpulsePainter extends _ScenePainter {
 // Scene 2 — grounding: the same fragments, pulled in and cited
 // ---------------------------------------------------------------------------
 
-const List<String> _sourceLabels = ['PDFs', 'Threads', 'Emails', 'Docs'];
-
 Widget visionGrounding(BuildContext context, VisionVisualState state) =>
-    _Visual(_GroundingPainter(state));
+    _Visual(
+      _GroundingPainter(
+        state,
+        context.tAll(VisionDiagramText.sources),
+        context.t(VisionDiagramText.groundedAnswer),
+      ),
+    );
 
 class _GroundingPainter extends _ScenePainter {
-  const _GroundingPainter(super.state);
+  const _GroundingPainter(super.state, this.sourceLabels, this.answerLabel);
+
+  final List<String> sourceLabels;
+  final String answerLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -229,13 +285,17 @@ class _GroundingPainter extends _ScenePainter {
     // The loose material collapses toward the core.
     for (var i = 0; i < _fragments.length; i++) {
       final from = _fragments[i];
-      final at = p(size, from.dx * (1 - pull * 0.62),
-          from.dy * (1 - pull * 0.62), s);
+      final at = p(
+        size,
+        from.dx * (1 - pull * 0.62),
+        from.dy * (1 - pull * 0.62),
+        s,
+      );
       _dot(canvas, at, 2.0, _Ink.node, (1 - pull * 0.55) * 0.5);
     }
 
     // Four of them resolve into named, cited sources.
-    for (var i = 0; i < _sourceLabels.length; i++) {
+    for (var i = 0; i < sourceLabels.length; i++) {
       final angle = -math.pi / 2 + i * math.pi / 2 + math.pi / 4;
       final at = p(size, math.cos(angle) * 0.62, math.sin(angle) * 0.62, s);
       final t = _step(entrance, 0.45 + i * 0.09, 0.95);
@@ -247,7 +307,7 @@ class _GroundingPainter extends _ScenePainter {
       _label(
         canvas,
         at + Offset(math.cos(angle), math.sin(angle)) * (s * 0.16),
-        _sourceLabels[i],
+        sourceLabels[i],
         t,
         size: 10,
         color: AppColors.textSecondary,
@@ -264,9 +324,14 @@ class _GroundingPainter extends _ScenePainter {
         ..strokeWidth = 1.2
         ..color = _Ink.focus.withValues(alpha: 0.35 * entrance),
     );
-    _label(canvas, centre + Offset(0, s * 0.30), 'grounded answer',
-        _step(entrance, 0.7, 1.0),
-        color: AppColors.accent, size: 11);
+    _label(
+      canvas,
+      centre + Offset(0, s * 0.30),
+      answerLabel,
+      _step(entrance, 0.7, 1.0),
+      color: AppColors.accent,
+      size: 11,
+    );
   }
 }
 
@@ -274,18 +339,19 @@ class _GroundingPainter extends _ScenePainter {
 // Scene 3 — the knowledge loop, with a human gate
 // ---------------------------------------------------------------------------
 
-const List<String> _loopStations = [
-  'Question',
-  'Knowledge gap',
-  'Proposal',
-  'Human review',
-];
-
-Widget visionLoop(BuildContext context, VisionVisualState state) =>
-    _Visual(_LoopPainter(state));
+Widget visionLoop(BuildContext context, VisionVisualState state) => _Visual(
+  _LoopPainter(
+    state,
+    context.tAll(VisionDiagramText.loopStations),
+    context.t(VisionDiagramText.confirmedKnowledge),
+  ),
+);
 
 class _LoopPainter extends _ScenePainter {
-  const _LoopPainter(super.state);
+  const _LoopPainter(super.state, this.stations, this.confirmedLabel);
+
+  final List<String> stations;
+  final String confirmedLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -306,32 +372,55 @@ class _LoopPainter extends _ScenePainter {
         ..color = _Ink.line,
     );
 
-    for (var i = 0; i < _loopStations.length; i++) {
+    for (var i = 0; i < stations.length; i++) {
       final angle = -math.pi / 2 + i * math.pi / 2;
       final at = centre + Offset(math.cos(angle) * r, math.sin(angle) * r);
       final t = _step(entrance, 0.2 + i * 0.16, 0.85 + i * 0.04);
       // The human gate is the one station that is allowed to be gold.
-      final human = i == _loopStations.length - 1;
-      _dot(canvas, at, human ? 6 : 4.5, human ? _Ink.focus : _Ink.live, t,
-          glow: human ? 4 : 2.6);
+      final human = i == stations.length - 1;
+      _dot(
+        canvas,
+        at,
+        human ? 6 : 4.5,
+        human ? _Ink.focus : _Ink.live,
+        t,
+        glow: human ? 4 : 2.6,
+      );
       // Top and bottom stations label outward; the side stations label
       // upward, because outward there would run past the edge of the box.
       final offset = i.isEven
           ? Offset(math.cos(angle), math.sin(angle)) * (s * 0.20)
           : Offset(0, -s * 0.17);
-      _label(canvas, at + offset, _loopStations[i], t,
-          color: human ? AppColors.accent : AppColors.textSecondary);
+      _label(
+        canvas,
+        at + offset,
+        stations[i],
+        t,
+        color: human ? AppColors.accent : AppColors.textSecondary,
+      );
     }
 
     // One item moving through the loop, so the cycle reads as a process.
     if (!still) {
       final angle = -math.pi / 2 + progress * 2 * math.pi;
-      _dot(canvas, centre + Offset(math.cos(angle) * r, math.sin(angle) * r),
-          3.2, AppColors.textPrimary, entrance);
+      _dot(
+        canvas,
+        centre + Offset(math.cos(angle) * r, math.sin(angle) * r),
+        3.2,
+        AppColors.textPrimary,
+        entrance,
+      );
     }
 
-    _label(canvas, centre, 'confirmed knowledge', _step(entrance, 0.75, 1.0),
-        color: AppColors.textMuted, size: 11, weight: FontWeight.w500);
+    _label(
+      canvas,
+      centre,
+      confirmedLabel,
+      _step(entrance, 0.75, 1.0),
+      color: AppColors.textMuted,
+      size: 11,
+      weight: FontWeight.w500,
+    );
   }
 }
 
@@ -339,19 +428,30 @@ class _LoopPainter extends _ScenePainter {
 // Scene 4 — several kinds of expertise on one question
 // ---------------------------------------------------------------------------
 
-const List<String> _disciplines = [
-  'Market',
-  'Finance',
-  'Customers',
-  'Technology',
-  'Strategy',
-];
-
 Widget visionManyMinds(BuildContext context, VisionVisualState state) =>
-    _Visual(_ManyMindsPainter(state));
+    _Visual(
+      _ManyMindsPainter(
+        state,
+        context.tAll(VisionDiagramText.disciplines),
+        context.t(VisionDiagramText.theQuestion),
+        context.t(VisionDiagramText.compared),
+        context.t(VisionDiagramText.lowConfidence),
+      ),
+    );
 
 class _ManyMindsPainter extends _ScenePainter {
-  const _ManyMindsPainter(super.state);
+  const _ManyMindsPainter(
+    super.state,
+    this.disciplines,
+    this.questionLabel,
+    this.comparedLabel,
+    this.flagLabel,
+  );
+
+  final List<String> disciplines;
+  final String questionLabel;
+  final String comparedLabel;
+  final String flagLabel;
 
   /// The lane deliberately drawn as unresolved: the vision is to surface
   /// disagreement, not to hide it behind one confident voice.
@@ -363,7 +463,7 @@ class _ManyMindsPainter extends _ScenePainter {
     final source = p(size, -0.88, 0, s);
     final synthesis = p(size, 0.86, 0, s);
 
-    for (var i = 0; i < _disciplines.length; i++) {
+    for (var i = 0; i < disciplines.length; i++) {
       final y = -0.56 + i * 0.28;
       final node = p(size, 0.0, y, s);
       final flagged = i == _flagged;
@@ -371,37 +471,64 @@ class _ManyMindsPainter extends _ScenePainter {
       final outT = _step(entrance, 0.45 + i * 0.07, 0.95);
 
       _link(canvas, source, node, inT, color: _Ink.line);
-      _link(canvas, node, synthesis, outT,
-          color: flagged
-              ? _Ink.flag.withValues(alpha: 0.75)
-              : _Ink.live.withValues(alpha: 0.5),
-          dashed: flagged);
+      _link(
+        canvas,
+        node,
+        synthesis,
+        outT,
+        color: flagged
+            ? _Ink.flag.withValues(alpha: 0.75)
+            : _Ink.live.withValues(alpha: 0.5),
+        dashed: flagged,
+      );
 
       if (!still && outT > 0.9) {
         _pulse(canvas, source, node, progress * 1.1 + i * 0.19, _Ink.node);
       }
-      _dot(canvas, node, flagged ? 5 : 4.5, flagged ? _Ink.flag : _Ink.live,
-          inT);
-      _label(canvas, node + Offset(0, -s * 0.13), _disciplines[i], inT,
-          size: 10);
+      _dot(
+        canvas,
+        node,
+        flagged ? 5 : 4.5,
+        flagged ? _Ink.flag : _Ink.live,
+        inT,
+      );
+      _label(
+        canvas,
+        node + Offset(0, -s * 0.13),
+        disciplines[i],
+        inT,
+        size: 10,
+      );
     }
 
     _dot(canvas, source, 7, _Ink.focus, _step(entrance, 0, 0.3), glow: 3.6);
-    _label(canvas, source + Offset(0, s * 0.20), 'the question',
-        _step(entrance, 0.1, 0.4),
-        color: AppColors.textMuted, size: 10, weight: FontWeight.w500);
+    _label(
+      canvas,
+      source + Offset(0, s * 0.20),
+      questionLabel,
+      _step(entrance, 0.1, 0.4),
+      color: AppColors.textMuted,
+      size: 10,
+      weight: FontWeight.w500,
+    );
 
     final synthT = _step(entrance, 0.7, 1.0);
     _dot(canvas, synthesis, 8, _Ink.focus, synthT, glow: 4);
-    _label(canvas, synthesis + Offset(0, s * 0.22), 'compared', synthT,
-        color: AppColors.accent, size: 10.5);
+    _label(
+      canvas,
+      synthesis + Offset(0, s * 0.22),
+      comparedLabel,
+      synthT,
+      color: AppColors.accent,
+      size: 10.5,
+    );
     // The flagged lane gets named, not quietly averaged away — but only
     // where there is room for the words.
     if (s > 95) {
       _label(
         canvas,
         p(size, 0.40, 0.13, s),
-        'low confidence',
+        flagLabel,
         _step(entrance, 0.8, 1.0),
         color: AppColors.statusInDevelopment,
         size: 9.5,
@@ -414,13 +541,19 @@ class _ManyMindsPainter extends _ScenePainter {
 // Scene 5 — insight becomes a prioritised plan
 // ---------------------------------------------------------------------------
 
-const List<String> _actionFacets = ['why', 'benefit', 'effort'];
-
-Widget visionAction(BuildContext context, VisionVisualState state) =>
-    _Visual(_ActionPainter(state));
+Widget visionAction(BuildContext context, VisionVisualState state) => _Visual(
+  _ActionPainter(
+    state,
+    context.tAll(VisionDiagramText.actionFacets),
+    context.t(VisionDiagramText.step),
+  ),
+);
 
 class _ActionPainter extends _ScenePainter {
-  const _ActionPainter(super.state);
+  const _ActionPainter(super.state, this.facets, this.stepLabel);
+
+  final List<String> facets;
+  final String stepLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -432,8 +565,9 @@ class _ActionPainter extends _ScenePainter {
     final cardW = math.min(s * 1.56, size.width * 0.88);
     // Three cards, two gaps and the head node above them all have to fit the
     // box: 1.5 + 3 + 2x0.46 card-heights, plus a little margin.
-    final cardH =
-        math.max(s * 0.30, 26.0).clamp(20.0, (size.height - 10) / 5.42);
+    final cardH = math
+        .max(s * 0.30, 26.0)
+        .clamp(20.0, (size.height - 10) / 5.42);
     final gap = cardH * 0.46;
     // Below this the facet chips stop fitting, so the card shows its rank
     // and its priority weight only.
@@ -482,14 +616,19 @@ class _ActionPainter extends _ScenePainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1
-          ..color = (i == 0 ? _Ink.focus : _Ink.line)
-              .withValues(alpha: (i == 0 ? 0.55 : 1.0) * t),
+          ..color = (i == 0 ? _Ink.focus : _Ink.line).withValues(
+            alpha: (i == 0 ? 0.55 : 1.0) * t,
+          ),
       );
       // Priority reads as rank down the left edge, strongest at the top.
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(
-              rect.left + 10, rect.center.dy - cardH * 0.22, 3, cardH * 0.44),
+            rect.left + 10,
+            rect.center.dy - cardH * 0.22,
+            3,
+            cardH * 0.44,
+          ),
           const Radius.circular(2),
         ),
         Paint()..color = _Ink.focus.withValues(alpha: (0.9 - i * 0.28) * t),
@@ -498,18 +637,18 @@ class _ActionPainter extends _ScenePainter {
       _label(
         canvas,
         Offset(compact ? rect.center.dx : rect.left + 52, rect.center.dy),
-        'Step ${i + 1}',
+        '$stepLabel ${i + 1}',
         t,
         color: i == 0 ? AppColors.accent : AppColors.textSecondary,
         size: 11,
       );
 
       if (compact) continue;
-      for (var f = 0; f < _actionFacets.length; f++) {
+      for (var f = 0; f < facets.length; f++) {
         _label(
           canvas,
           Offset(rect.left + cardW * (0.46 + f * 0.19), rect.center.dy),
-          _actionFacets[f],
+          facets[f],
           t * 0.85,
           color: AppColors.textMuted,
           size: 9.5,
@@ -525,10 +664,12 @@ class _ActionPainter extends _ScenePainter {
 // ---------------------------------------------------------------------------
 
 Widget visionMemory(BuildContext context, VisionVisualState state) =>
-    _Visual(_MemoryPainter(state));
+    _Visual(_MemoryPainter(state, context.t(VisionDiagramText.companyMemory)));
 
 class _MemoryPainter extends _ScenePainter {
-  const _MemoryPainter(super.state);
+  const _MemoryPainter(super.state, this.memoryLabel);
+
+  final String memoryLabel;
 
   static const int _rings = 5;
 
@@ -556,19 +697,29 @@ class _MemoryPainter extends _ScenePainter {
       final marks = 4 + ring * 2;
       for (var m = 0; m < marks; m++) {
         final angle = (m / marks + drift + ring * 0.07) * 2 * math.pi;
-        final at = centre +
-            Offset(math.cos(angle) * radius, math.sin(angle) * radius);
+        final at =
+            centre + Offset(math.cos(angle) * radius, math.sin(angle) * radius);
         final worked = (m + ring) % 3 != 0;
-        _dot(canvas, at, worked ? 3.0 : 2.2,
-            worked ? _Ink.focus : _Ink.node, t * (worked ? 0.9 : 0.45),
-            glow: worked ? 3 : 1.8);
+        _dot(
+          canvas,
+          at,
+          worked ? 3.0 : 2.2,
+          worked ? _Ink.focus : _Ink.node,
+          t * (worked ? 0.9 : 0.45),
+          glow: worked ? 3 : 1.8,
+        );
       }
     }
 
     _dot(canvas, centre, 7, _Ink.focus, entrance, glow: 4);
-    _label(canvas, centre + Offset(0, s * 0.13), 'company memory',
-        _step(entrance, 0.6, 1.0),
-        color: AppColors.textMuted, size: 10.5);
+    _label(
+      canvas,
+      centre + Offset(0, s * 0.13),
+      memoryLabel,
+      _step(entrance, 0.6, 1.0),
+      color: AppColors.textMuted,
+      size: 10.5,
+    );
   }
 }
 
@@ -578,9 +729,13 @@ class _MemoryPainter extends _ScenePainter {
 
 const List<Offset> _constellation = [
   Offset(0, 0),
-  Offset(-0.66, -0.42), Offset(0.04, -0.68), Offset(0.70, -0.40),
-  Offset(-0.80, 0.16), Offset(0.82, 0.18),
-  Offset(-0.44, 0.62), Offset(0.30, 0.70),
+  Offset(-0.66, -0.42),
+  Offset(0.04, -0.68),
+  Offset(0.70, -0.40),
+  Offset(-0.80, 0.16),
+  Offset(0.82, 0.18),
+  Offset(-0.44, 0.62),
+  Offset(0.30, 0.70),
 ];
 
 Widget visionConstellation(BuildContext context, VisionVisualState state) =>
@@ -596,18 +751,29 @@ class _ConstellationPainter extends _ScenePainter {
     final breath = still ? 1.0 : 1 + math.sin(progress * math.pi * 2) * 0.012;
     final centre = p(size, 0, 0, s);
 
-    Offset at(int i) => centre +
+    Offset at(int i) =>
+        centre +
         Offset(_constellation[i].dx, _constellation[i].dy) * s * breath;
 
     for (var i = 1; i < _constellation.length; i++) {
-      _link(canvas, at(0), at(i), _step(entrance, 0.1 + i * 0.06, 0.75),
-          color: _Ink.line);
+      _link(
+        canvas,
+        at(0),
+        at(i),
+        _step(entrance, 0.1 + i * 0.06, 0.75),
+        color: _Ink.line,
+      );
     }
     // The outer ring closes on itself: a system, not a hub and spokes.
     for (var i = 1; i < _constellation.length; i++) {
       final next = i == _constellation.length - 1 ? 1 : i + 1;
-      _link(canvas, at(i), at(next), _step(entrance, 0.45 + i * 0.05, 1.0),
-          color: _Ink.line.withValues(alpha: 0.6));
+      _link(
+        canvas,
+        at(i),
+        at(next),
+        _step(entrance, 0.45 + i * 0.05, 1.0),
+        color: _Ink.line.withValues(alpha: 0.6),
+      );
     }
 
     for (var i = 1; i < _constellation.length; i++) {

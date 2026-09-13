@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 
 /// Site-wide footer.
@@ -31,14 +33,16 @@ class FooterSection extends StatelessWidget {
             runSpacing: 12,
             children: [
               Text(
-                '© 2026 CatLab Studios · Built with Flutter',
+                context.t(SiteText.footerCopyright),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: AppColors.textMuted,
                 ),
               ),
               Text(
-                '${AppProjectsRepository.all.length} projects · '
-                '6 fields · mobile, web & desktop',
+                context.t(
+                  SiteText.footerStats,
+                  params: {'count': '${AppProjectsRepository.all.length}'},
+                ),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: AppColors.textMuted,
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
 import 'package:catlab_studios/data/models/app_platform.dart';
 
@@ -72,7 +73,7 @@ class _CompactChip extends StatelessWidget {
           if (stage != null && stage != PlatformStage.available) ...[
             const SizedBox(width: 3),
             Text(
-              stage.shortLabel.toUpperCase(),
+              context.t(stage.shortLabel).toUpperCase(),
               style: TextStyle(
                 color: stage.color,
                 fontSize: 8.5,
@@ -129,7 +130,7 @@ class _LabelledChip extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: accent.withAlpha(140)),
             ),
             Text(
-              stage.detailLabel,
+              context.t(stage.detailLabel),
               style: TextStyle(
                 fontSize: 12,
                 color: accent,

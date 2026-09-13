@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
 import 'package:catlab_studios/features/vision/domain/vision_story.dart';
 import 'package:catlab_studios/features/vision/presentation/vision_story_controller.dart';
 
@@ -30,8 +32,10 @@ class VisionStoryPlayer extends StatefulWidget {
         reverseTransitionDuration: const Duration(milliseconds: 220),
         pageBuilder: (_, _, _) => VisionStoryPlayer(story: story),
         transitionsBuilder: (context, animation, _, child) {
-          final eased =
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+          final eased = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          );
           return FadeTransition(
             opacity: eased,
             child: MediaQuery.disableAnimationsOf(context)
@@ -220,15 +224,18 @@ class _Header extends StatelessWidget {
                     // else is on show, this is a vision story.
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 9, vertical: 4),
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: AppColors.accent.withValues(alpha: 0.55)),
+                          color: AppColors.accent.withValues(alpha: 0.55),
+                        ),
                       ),
-                      child: const Text(
-                        'VISION STORY',
-                        style: TextStyle(
+                      child: Text(
+                        context.t(SiteText.visionStoryBadge),
+                        style: const TextStyle(
                           color: AppColors.accent,
                           fontSize: 9.5,
                           fontWeight: FontWeight.w800,
@@ -239,7 +246,7 @@ class _Header extends StatelessWidget {
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        story.title,
+                        context.t(story.title),
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: AppColors.textPrimary,
@@ -252,7 +259,7 @@ class _Header extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  story.subtitle,
+                  context.t(story.subtitle),
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: AppColors.textMuted,
@@ -266,7 +273,7 @@ class _Header extends StatelessWidget {
             onPressed: onClose,
             icon: const Icon(Icons.close_rounded),
             color: AppColors.textSecondary,
-            tooltip: 'Close',
+            tooltip: context.t(SiteText.actionClose),
             iconSize: 22,
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
@@ -308,7 +315,7 @@ class _SceneView extends StatelessWidget {
         ? Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Expanded(flex: 6, child: copy),
+              Expanded(flex: 7, child: copy),
               SizedBox(width: metrics.gutter),
               Expanded(flex: 5, child: visual),
             ],
@@ -325,8 +332,10 @@ class _SceneView extends StatelessWidget {
               final dense = scene.points.isNotEmpty;
               final cap = metrics.short ? 170.0 : (dense ? 210.0 : 300.0);
               final visualHeight =
-                  (constraints.maxHeight * (dense ? 0.30 : 0.40))
-                      .clamp(120.0, cap);
+                  (constraints.maxHeight * (dense ? 0.30 : 0.40)).clamp(
+                    120.0,
+                    cap,
+                  );
               return Column(
                 children: [
                   SizedBox(height: visualHeight, child: visual),
@@ -339,7 +348,11 @@ class _SceneView extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          metrics.gutter, 8, metrics.gutter, metrics.wide ? 8 : 4),
+        metrics.gutter,
+        8,
+        metrics.gutter,
+        metrics.wide ? 8 : 4,
+      ),
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: reduced ? 130 : 460),
         switchInCurve: Curves.easeOutCubic,
@@ -410,7 +423,7 @@ class _SceneCopy extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(
-              scene.kicker.toUpperCase(),
+              context.t(scene.kicker).toUpperCase(),
               style: const TextStyle(
                 color: AppColors.textMuted,
                 fontSize: 10.5,
@@ -428,7 +441,7 @@ class _SceneCopy extends StatelessWidget {
         start: 0.02,
         end: 0.14,
         child: Text(
-          scene.headline,
+          context.t(scene.headline),
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: metrics.headline,
@@ -444,7 +457,7 @@ class _SceneCopy extends StatelessWidget {
         start: 0.08,
         end: 0.20,
         child: Text(
-          scene.body,
+          context.t(scene.body),
           style: TextStyle(
             color: AppColors.textSecondary,
             fontSize: metrics.body,
@@ -454,39 +467,35 @@ class _SceneCopy extends StatelessWidget {
       ),
     ];
 
-    void addStageNote() {
-      if (scene.stageNote == null) return;
+    // The today-note goes directly under the claim it qualifies, before the
+    // supporting points. It used to sit last, which read well in English —
+    // until a longer translation pushed it below the fold and the honest
+    // counterweight became the one thing a viewer could not see.
+    if (scene.stageNote != null) {
       children
-        ..add(SizedBox(height: metrics.wide ? 20 : 16))
+        ..add(SizedBox(height: metrics.wide ? 18 : 16))
         ..add(
           _Reveal(
             controller: controller,
-            start: metrics.wide ? 0.30 : 0.16,
-            end: metrics.wide ? 0.44 : 0.28,
-            child: _StageNote(scene.stageNote!),
+            start: 0.16,
+            end: 0.28,
+            child: _StageNote(context.t(scene.stageNote!)),
           ),
         );
     }
 
-    // On a phone the points are what may fall below the fold; the today-note
-    // never is, so it goes first there.
-    if (!metrics.wide) addStageNote();
-
     for (var i = 0; i < scene.points.length; i++) {
-      final delay = metrics.wide ? 0.0 : 0.06;
       children
         ..add(SizedBox(height: i == 0 ? (metrics.wide ? 18 : 14) : 9))
         ..add(
           _Reveal(
             controller: controller,
-            start: 0.16 + delay + i * 0.05,
-            end: 0.28 + delay + i * 0.05,
-            child: _Point(scene.points[i], metrics: metrics),
+            start: 0.22 + i * 0.05,
+            end: 0.34 + i * 0.05,
+            child: _Point(context.t(scene.points[i]), metrics: metrics),
           ),
         );
     }
-
-    if (metrics.wide) addStageNote();
 
     if (controller.isFinished) {
       children
@@ -501,11 +510,10 @@ class _SceneCopy extends StatelessWidget {
         children: children,
       ),
     );
-    if (metrics.wide) return column;
-
-    // A phone scene can run longer than the viewport. Fading the last few
-    // pixels says "there is more" instead of looking like a clipping bug;
-    // the content itself stays scrollable and complete.
+    // A scene's copy can run longer than the space it has — a phone always,
+    // a desktop once a translation is long enough. Fading the last few pixels
+    // says "there is more" instead of looking like a clipping bug; the
+    // content itself stays scrollable and complete.
     return ShaderMask(
       shaderCallback: (rect) => const LinearGradient(
         begin: Alignment.topCenter,
@@ -573,13 +581,15 @@ class _StageBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isToday ? Icons.check_circle_outline_rounded : Icons.north_east_rounded,
+            isToday
+                ? Icons.check_circle_outline_rounded
+                : Icons.north_east_rounded,
             size: 11,
             color: color,
           ),
           const SizedBox(width: 5),
           Text(
-            stage.label.toUpperCase(),
+            context.t(stage.label).toUpperCase(),
             style: TextStyle(
               color: color,
               fontSize: 9.5,
@@ -644,25 +654,29 @@ class _Ending extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: controller.restart,
           icon: const Icon(Icons.replay_rounded, size: 17),
-          label: const Text('Watch again'),
+          label: Text(context.t(SiteText.visionWatchAgain)),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.accent,
             side: BorderSide(color: AppColors.accent.withValues(alpha: 0.6)),
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-            textStyle:
-                const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         // Sends the viewer back to the factual half of the project.
         TextButton.icon(
           onPressed: onClose,
           icon: const Icon(Icons.arrow_back_rounded, size: 17),
-          label: const Text('See what exists today'),
+          label: Text(context.t(SiteText.visionSeeToday)),
           style: TextButton.styleFrom(
             foregroundColor: AppColors.textSecondary,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
-            textStyle:
-                const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
+            textStyle: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -725,7 +739,11 @@ class _Transport extends StatelessWidget {
     final count = controller.story.sceneCount;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-          metrics.gutter, 4, metrics.gutter, metrics.wide ? 20 : 12),
+        metrics.gutter,
+        4,
+        metrics.gutter,
+        metrics.wide ? 20 : 12,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -741,7 +759,7 @@ class _Transport extends StatelessWidget {
                     child: _Segment(
                       fill: controller.segmentFill(i),
                       index: i,
-                      label: controller.story.scenes[i].kicker,
+                      label: context.t(controller.story.scenes[i].kicker),
                       onTap: () => controller.goTo(i),
                     ),
                   ),
@@ -773,7 +791,7 @@ class _Transport extends StatelessWidget {
                   children: [
                     _TransportButton(
                       icon: Icons.skip_previous_rounded,
-                      tooltip: 'Previous scene',
+                      tooltip: context.t(SiteText.visionPreviousScene),
                       onPressed: controller.previous,
                     ),
                     const SizedBox(width: 6),
@@ -781,7 +799,7 @@ class _Transport extends StatelessWidget {
                     const SizedBox(width: 6),
                     _TransportButton(
                       icon: Icons.skip_next_rounded,
-                      tooltip: 'Next scene',
+                      tooltip: context.t(SiteText.visionNextScene),
                       onPressed: controller.isLast && controller.isFinished
                           ? null
                           : controller.next,
@@ -827,7 +845,10 @@ class _Segment extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Scene ${index + 1}: $label',
+      label: context.t(
+        SiteText.visionSceneLabel,
+        params: {'number': '${index + 1}', 'title': label},
+      ),
       child: Tooltip(
         message: label,
         waitDuration: const Duration(milliseconds: 400),
@@ -879,10 +900,18 @@ class _PlayButton extends StatelessWidget {
     final finished = controller.isFinished;
     final playing = controller.isPlaying;
     return Tooltip(
-      message: finished ? 'Replay' : (playing ? 'Pause' : 'Play'),
+      message: context.t(
+        finished
+            ? SiteText.visionReplay
+            : (playing ? SiteText.visionPause : SiteText.visionPlay),
+      ),
       child: Semantics(
         button: true,
-        label: finished ? 'Replay' : (playing ? 'Pause' : 'Play'),
+        label: context.t(
+          finished
+              ? SiteText.visionReplay
+              : (playing ? SiteText.visionPause : SiteText.visionPlay),
+        ),
         child: Material(
           color: AppColors.accent,
           shape: const CircleBorder(),
@@ -895,7 +924,9 @@ class _PlayButton extends StatelessWidget {
               child: Icon(
                 finished
                     ? Icons.replay_rounded
-                    : (playing ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                    : (playing
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded),
                 color: AppColors.background,
                 size: 26,
               ),

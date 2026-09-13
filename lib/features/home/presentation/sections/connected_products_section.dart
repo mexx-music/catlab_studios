@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:catlab_studios/core/constants/app_colors.dart';
+import 'package:catlab_studios/core/l10n/localized_text.dart';
+import 'package:catlab_studios/core/l10n/site_text.dart';
 import 'package:catlab_studios/data/models/connected_product.dart';
 import 'package:catlab_studios/data/repositories/app_projects_repository.dart';
 import 'package:catlab_studios/data/repositories/connected_products_repository.dart';
@@ -34,7 +36,7 @@ class ConnectedProductsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Connected Products',
+            context.t(SiteText.connectedTitle),
             style: theme.textTheme.displayMedium?.copyWith(
               fontSize: isNarrow ? 30 : 40,
             ),
@@ -43,8 +45,7 @@ class ConnectedProductsSection extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 640),
             child: Text(
-              'Not everything we build lives on a screen. Sometimes an app '
-              'comes with something you can hold.',
+              context.t(SiteText.connectedIntro),
               style: theme.textTheme.bodyLarge,
             ),
           ),
@@ -251,7 +252,7 @@ class _ProductCopy extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          product.tagline,
+          context.t(product.tagline),
           style: const TextStyle(
             color: AppColors.accent,
             fontSize: 14.5,
@@ -260,7 +261,7 @@ class _ProductCopy extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          product.description,
+          context.t(product.description),
           style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 14.5,
@@ -285,7 +286,7 @@ class _ProductCopy extends StatelessWidget {
                     border: Border.all(color: AppColors.cardBorder),
                   ),
                   child: Text(
-                    highlight,
+                    context.t(highlight),
                     style: const TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 12,
@@ -306,7 +307,9 @@ class _ProductCopy extends StatelessWidget {
               LinkButton(link: link, filled: true, useLongLabel: true),
             if (onOpenCompanionApp != null)
               _CompanionAppChip(
-                note: product.companionAppNote ?? 'Companion app',
+                note: context.t(
+                  product.companionAppNote ?? SiteText.connectedCompanionApp,
+                ),
                 onTap: onOpenCompanionApp!,
               ),
           ],
