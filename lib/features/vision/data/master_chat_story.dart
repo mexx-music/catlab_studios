@@ -19,16 +19,24 @@ import 'package:catlab_studios/features/vision/presentation/master_chat_visuals.
 ///     conversion, date/time, contacts — are real implementations.
 ///   * The **connected demo projects** (BusinessBrain, Palettenfuchs, Fuel)
 ///     are architecture demonstrations: their tool bodies return canned data,
-///     which `customer_search_tool.dart` says in as many words. Scene seven
-///     states that outright rather than letting the gateway diagram imply
-///     otherwise.
+///     which `customer_search_tool.dart` says in as many words. The story
+///     therefore never claims that a connected business tool does real work;
+///     the capabilities it shows by name — calculating, noting, planning —
+///     are the built-in ones that genuinely do.
 ///   * Splitting a task across several intelligences, and a context that
 ///     outlives a bounded window, are **direction** — there is no planner and
 ///     no multi-agent orchestration in the repository.
 ///
-/// AI-hint: promote nothing here to `today` without a implementation to point
-/// at; this project's documentation is honest about its own gaps, and the
-/// story has to be at least as honest.
+/// The copy is deliberately non-technical. This story is read by people who
+/// do not write software, and a sentence that has to be read twice has failed
+/// — so registries, gateways, adapters, scopes and protocol names stay in the
+/// Master Chat repository's own documentation, where they belong and where
+/// they remain in full. Nothing was deleted; it was moved out of the shop
+/// window. What survives here is the *claim*, in plain words, with the same
+/// TODAY/VISION line drawn in exactly the same place.
+///
+/// AI-hint: promote nothing here to `today` without an implementation to
+/// point at — and add no term a non-developer would have to look up.
 final VisionStory masterChatStory = VisionStory(
   projectId: 'master_chat',
   title: LocalizedText({'en': 'Master Chat', 'de': 'Master Chat'}),
@@ -45,67 +53,49 @@ final VisionStory masterChatStory = VisionStory(
         'de': 'Der Ausgangspunkt',
       }),
       headline: LocalizedText({
-        'en': 'We built an app for everything.',
-        'de': 'Für alles wurde eine App gebaut.',
+        'en': "Today there's an app for almost everything.",
+        'de': 'Für fast alles gibt es heute eine eigene App.',
       }),
       body: LocalizedText({
         'en':
-            'Calculator, notes, tasks, calendar, documents, business '
-            'software, development tools — each with its own window and its '
-            'own idea of what you were doing. But nobody thinks in apps. '
-            'People think "work this out", "write that down", "remind me on '
-            'Tuesday".',
+            'Calculate. Take notes. Plan. Search. Write. But people do not '
+            'think in apps. They think about what they want to get done.',
         'de':
-            'Rechner, Notizen, Aufgaben, Kalender, Dokumente, '
-            'Businesssoftware, Entwicklungswerkzeuge — jedes mit eigenem '
-            'Fenster und eigener Vorstellung davon, woran gerade gearbeitet '
-            'wird. Nur denkt niemand in Apps. Menschen denken: „Rechne das '
-            'aus", „Schreib das auf", „Erinnere mich am Dienstag".',
+            'Rechnen. Notieren. Planen. Suchen. Schreiben. Aber Menschen '
+            'denken nicht in Apps. Sie denken daran, was sie erledigen '
+            'möchten.',
       }),
       visual: masterChatScatteredApps,
-      duration: Duration(seconds: 9),
+      duration: Duration(seconds: 8),
     ),
 
     // ── 2 ─────────────────────────────────────────────────────────────────
     VisionScene(
       id: 'one-surface',
-      kicker: LocalizedText({'en': 'One surface', 'de': 'Eine Oberfläche'}),
+      kicker: LocalizedText({'en': 'One interface', 'de': 'Eine Oberfläche'}),
       headline: LocalizedText({
-        'en': 'One conversation. One context.',
-        'de': 'Ein Gespräch. Ein Kontext.',
+        'en': 'Just say what you want to do.',
+        'de': 'Sag einfach, was du machen möchtest.',
       }),
       body: LocalizedText({
         'en':
-            'Master Chat is a single chat layer that applications plug into. '
-            'You describe the goal; the system resolves which registered '
-            'capability can reach it. There is no module grid and no tool '
-            'catalogue to learn — the permanent interface is a prompt and a '
-            'microphone, and everything else appears only while it is needed.',
+            'Master Chat is the one place you start. You do not have to find '
+            'the right tool first — it understands the task and brings up what '
+            'you need.',
         'de':
-            'Master Chat ist eine einzige Chat-Schicht, an die sich '
-            'Anwendungen anschließen. Sie beschreiben das Ziel; das System '
-            'ermittelt, welche registrierte Fähigkeit es erreichen kann. Es '
-            'gibt kein Modulraster und keinen Werkzeugkatalog zu lernen — die '
-            'dauerhafte Oberfläche ist eine Eingabe und ein Mikrofon, alles '
-            'andere erscheint nur, solange es gebraucht wird.',
+            'Master Chat ist die zentrale Oberfläche. Du musst nicht zuerst '
+            'das richtige Werkzeug suchen — Master Chat erkennt deine Aufgabe '
+            'und stellt dir die passende Funktion bereit.',
       }),
       points: [
         LocalizedText({
-          'en': 'Natural language in, registered tools out',
-          'de': 'Natürliche Sprache hinein, registrierte Werkzeuge hinaus',
-        }),
-        LocalizedText({
-          'en': 'The interface shows only what the task needs',
-          'de': 'Die Oberfläche zeigt nur, was die Aufgabe braucht',
-        }),
-        LocalizedText({
-          'en': 'A spoken sentence and a typed one are the same sentence',
-          'de': 'Ein gesprochener und ein getippter Satz sind derselbe Satz',
+          'en': 'One conversation. One place to start.',
+          'de': 'Ein Gespräch. Ein gemeinsamer Ausgangspunkt.',
         }),
       ],
       stage: VisionStage.today,
       visual: masterChatOneSurface,
-      duration: Duration(seconds: 11),
+      duration: Duration(seconds: 9),
     ),
 
     // ── 3 ─────────────────────────────────────────────────────────────────
@@ -113,44 +103,31 @@ final VisionStory masterChatStory = VisionStory(
       id: 'capabilities',
       kicker: LocalizedText({
         'en': 'The right capability',
-        'de': 'Die passende Fähigkeit',
+        'de': 'Die richtige Fähigkeit',
       }),
       headline: LocalizedText({
-        'en': 'What it could offer, and what it can run right now.',
-        'de': 'Was möglich wäre — und was gerade läuft.',
+        'en': 'Every task needs something different.',
+        'de': 'Jede Aufgabe braucht etwas anderes.',
       }),
       body: LocalizedText({
         'en':
-            'Two registries, on purpose. One answers "what can execute?", '
-            'the other "what could this system offer?" — a superset, because a '
-            'capability can be known before anything can run it. Availability '
-            'is computed at runtime, the most restrictive answer wins, and '
-            'anything the app cannot verify blocks instead of being assumed.',
+            'Need to work something out? Note it down? Plan it? Master Chat '
+            'recognises which of its capabilities can help.',
         'de':
-            'Zwei Registries, mit Absicht. Die eine beantwortet „Was kann '
-            'ausgeführt werden?", die andere „Was könnte dieses System '
-            'anbieten?" — eine Obermenge, denn eine Fähigkeit kann bekannt '
-            'sein, bevor irgendetwas sie ausführen kann. Verfügbarkeit wird zur '
-            'Laufzeit ermittelt, die restriktivste Antwort gewinnt, und was '
-            'die App nicht prüfen kann, blockiert, statt angenommen zu werden.',
+            'Etwas ausrechnen? Etwas notieren? Etwas planen? Master Chat '
+            'erkennt, welche seiner Fähigkeiten dafür gebraucht wird.',
       }),
       points: [
         LocalizedText({
-          'en': '"I cannot do that" becomes "that module is not active"',
-          'de': '„Das kann ich nicht" wird zu „Dieses Modul ist nicht aktiv"',
-        }),
-        LocalizedText({
-          'en': 'Unverifiable means blocked, never assumed',
-          'de': 'Nicht prüfbar heißt blockiert, nie angenommen',
-        }),
-        LocalizedText({
-          'en': 'Discovery never grants permission',
-          'de': 'Etwas zu finden erteilt keine Berechtigung',
+          'en': 'You describe the goal. The system takes care of the rest.',
+          'de':
+              'Du beschreibst dein Ziel. Das System kümmert sich um den '
+              'Rest.',
         }),
       ],
       stage: VisionStage.today,
       visual: masterChatCapabilities,
-      duration: Duration(seconds: 12),
+      duration: Duration(seconds: 9),
     ),
 
     // ── 4 ─────────────────────────────────────────────────────────────────
@@ -161,195 +138,151 @@ final VisionStory masterChatStory = VisionStory(
         'de': 'Die Oberfläche passt sich an',
       }),
       headline: LocalizedText({
-        'en': 'One state. Many hands.',
-        'de': 'Ein Zustand. Viele Hände.',
+        'en': "Sometimes a chat isn't enough.",
+        'de': 'Manchmal reicht ein Chat nicht.',
       }),
       body: LocalizedText({
         'en':
-            'Say "59 plus 7" and a calculator appears — not a picture of '
-            'one. Keypad, keyboard and voice all edit the same value, because '
-            'there is only ever one. The model is never handed a copy to '
-            'reason from: it reads a snapshot and acts by sending back an '
-            'intent like "multiply by two".',
+            'Say "59 plus 7" and the calculator appears. Voice, keyboard and '
+            'the calculator keys all work on the same thing.',
         'de':
-            'Sagen Sie „59 plus 7", und ein Rechner erscheint — kein Bild '
-            'von einem. Tastenfeld, Tastatur und Stimme bearbeiten denselben '
-            'Wert, weil es immer nur einen gibt. Das Modell bekommt nie eine '
-            'Kopie zum Nachdenken: Es liest ein Abbild und handelt, indem es '
-            'eine Absicht zurückschickt — etwa „mal zwei".',
+            'Sag „59 plus 7" — und der Rechner erscheint. Sprache, Tastatur '
+            'und Rechner-Tasten arbeiten dabei am selben.',
       }),
       points: [
         LocalizedText({
-          'en': 'Actions say what should happen, never which pixel to press',
-          'de': 'Aktionen sagen, was geschehen soll — nie, welches Pixel',
-        }),
-        LocalizedText({
-          'en': 'While a surface is open, it owns the microphone',
-          'de': 'Solange eine Oberfläche offen ist, gehört ihr das Mikrofon',
-        }),
-        LocalizedText({
-          'en': 'Calculator, notes, tasks, timer and a loading plan run on it',
-          'de':
-              'Rechner, Notizen, Aufgaben, Timer und ein Ladeplan laufen '
-              'darauf',
+          'en': 'The interface you need, when you need it.',
+          'de': 'Genau die Oberfläche, die du gerade brauchst.',
         }),
       ],
       stage: VisionStage.today,
       visual: masterChatOneState,
-      duration: Duration(seconds: 12),
+      duration: Duration(seconds: 10),
     ),
 
     // ── 5 ─────────────────────────────────────────────────────────────────
     VisionScene(
       id: 'shared-context',
       kicker: LocalizedText({
-        'en': 'One shared context',
-        'de': 'Ein gemeinsamer Kontext',
+        'en': 'Everything works together',
+        'de': 'Alles arbeitet zusammen',
       }),
       headline: LocalizedText({
-        'en': 'Not a launcher for other apps.',
-        'de': 'Kein Starter für andere Apps.',
+        'en': 'A task rarely ends with one tool.',
+        'de': 'Eine Aufgabe endet selten bei einem Werkzeug.',
       }),
       body: LocalizedText({
         'en':
-            'The direction is that what one capability produces stays '
-            'available to the next — inside one continuous piece of work, '
-            'bounded by what permissions and security allow. Not "chat opens '
-            'calculator, chat opens notes", but one task that happens to need '
-            'several things.',
+            'You might work something out, save the result, and plan the '
+            'next step from it. The vision: Master Chat joins those steps into '
+            'one continuous piece of work.',
         'de':
-            'Die Richtung: Was eine Fähigkeit hervorbringt, bleibt für die '
-            'nächste verfügbar — innerhalb einer zusammenhängenden Arbeit, '
-            'begrenzt durch das, was Berechtigungen und Sicherheit zulassen. '
-            'Nicht „Chat öffnet Rechner, Chat öffnet Notizen", sondern eine '
-            'Aufgabe, die eben mehreres braucht.',
+            'Vielleicht rechnest du zuerst etwas aus, notierst das Ergebnis '
+            'und planst daraus den nächsten Schritt. Die Vision: Master Chat '
+            'verbindet diese Schritte zu einer zusammenhängenden Arbeit.',
       }),
       points: [
         LocalizedText({
-          'en': 'Results stay available to the next step',
-          'de': 'Ergebnisse bleiben für den nächsten Schritt verfügbar',
-        }),
-        LocalizedText({
-          'en': 'Bounded by permission, not by convenience',
-          'de': 'Begrenzt durch Berechtigung, nicht durch Bequemlichkeit',
+          'en': 'You keep your goal in sight. Master Chat keeps the thread.',
+          'de':
+              'Du behältst dein Ziel im Blick. Master Chat behält den '
+              'Zusammenhang.',
         }),
       ],
       stage: VisionStage.vision,
       stageNote: LocalizedText({
         'en':
-            'Today a conversation keeps a bounded window of recent turns '
-            'plus the active surface, survives a restart, and syncs per '
-            'workspace when signed in. Summarisation and long-term memory are '
-            'later phases.',
+            'Today a conversation remembers what you are working on right '
+            'now. Carrying that across many steps is still ahead.',
         'de':
-            'Heute behält ein Gespräch ein begrenztes Fenster der letzten '
-            'Züge plus die aktive Oberfläche, übersteht einen Neustart und '
-            'synchronisiert pro Workspace, wenn man angemeldet ist. '
-            'Zusammenfassung und Langzeitgedächtnis sind spätere Phasen.',
+            'Heute merkt sich ein Gespräch, woran gerade gearbeitet wird. '
+            'Das über viele Schritte hinweg zu tragen, steht noch bevor.',
       }),
       visual: masterChatContext,
-      duration: Duration(seconds: 12),
+      duration: Duration(seconds: 10),
     ),
 
     // ── 6 ─────────────────────────────────────────────────────────────────
     VisionScene(
       id: 'many-intelligences',
       kicker: LocalizedText({
-        'en': 'Many intelligences',
-        'de': 'Viele Intelligenzen',
+        'en': 'More than one AI',
+        'de': 'Mehr als eine KI',
       }),
       headline: LocalizedText({
-        'en': 'One interface does not mean one intelligence.',
-        'de': 'Eine Oberfläche heißt nicht eine Intelligenz.',
+        'en': 'No single AI is best at everything.',
+        'de': 'Keine KI ist in allem die beste.',
       }),
       body: LocalizedText({
         'en':
-            'The AI layer is vendor-neutral by construction: OpenAI and '
-            'Claude are two adapters behind one interface, and switching '
-            'between them is a build flag rather than a rewrite. The direction '
-            'is to let a task be split across specialised systems and have the '
-            'parts come back together.',
+            'So the vision is not to leave it all to one system. Different '
+            'AI systems and specialised skills can be used where they fit '
+            'best — and Master Chat brings the results back together.',
         'de':
-            'Die KI-Schicht ist von Grund auf herstellerneutral: OpenAI und '
-            'Claude sind zwei Adapter hinter einer Schnittstelle, und der '
-            'Wechsel ist ein Build-Schalter statt einer Neuentwicklung. Die '
-            'Richtung: eine Aufgabe auf spezialisierte Systeme aufteilen und '
-            'die Teile wieder zusammenführen.',
+            'Die Vision ist deshalb nicht, alles einem einzigen System zu '
+            'überlassen. Unterschiedliche KI-Systeme und spezialisierte '
+            'Fähigkeiten können dort eingesetzt werden, wo sie am besten '
+            'passen — Master Chat führt die Ergebnisse wieder zusammen.',
       }),
       points: [
         LocalizedText({
-          'en': 'The provider is an adapter, not an assumption',
-          'de': 'Der Anbieter ist ein Adapter, keine Annahme',
-        }),
-        LocalizedText({
-          'en': 'The cheapest reliable layer answers first',
-          'de': 'Die einfachste verlässliche Ebene antwortet zuerst',
+          'en': 'One interface. Many specialists.',
+          'de': 'Eine Oberfläche. Viele Spezialisten.',
         }),
       ],
       stage: VisionStage.vision,
       stageNote: LocalizedText({
         'en':
-            'Today one provider answers at a time and tool calls run in '
-            'order. There is no planner and no multi-agent orchestration.',
+            'Today one system answers at a time. Several of them working on '
+            'the same task is the next step.',
         'de':
-            'Heute antwortet ein Anbieter zur Zeit, und Werkzeugaufrufe '
-            'laufen der Reihe nach. Es gibt keinen Planer und keine '
-            'Multi-Agenten-Orchestrierung.',
+            'Heute antwortet ein System nach dem anderen. Dass mehrere an '
+            'derselben Aufgabe arbeiten, ist der nächste Schritt.',
       }),
       visual: masterChatIntelligences,
-      duration: Duration(seconds: 12),
+      duration: Duration(seconds: 9),
     ),
 
     // ── 7 ─────────────────────────────────────────────────────────────────
     VisionScene(
       id: 'action',
       kicker: LocalizedText({
-        'en': 'From answer to action',
-        'de': 'Von der Antwort zur Handlung',
+        'en': 'Beyond answers',
+        'de': 'Nicht nur antworten',
       }),
       headline: LocalizedText({
-        'en': "Don't just tell me how. Help me do it.",
-        'de': 'Sag mir nicht nur wie. Hilf mir, es zu tun.',
+        'en': 'A good answer is often only the beginning.',
+        'de': 'Eine gute Antwort ist oft erst der Anfang.',
       }),
       body: LocalizedText({
         'en':
-            'A capability is written once and registered once. The chat, an '
-            'HTTP client and any MCP-compatible agent resolve it in the same '
-            'registry — there is no separate "API tool". Anything that changes '
-            'something stops first: the gateway parks the action behind a '
-            'one-time confirmation, exactly as the chat shows a confirmation '
-            'card.',
+            'A normal chat tells you how something is done. Master Chat is '
+            'built to help you actually do it — and when something important '
+            'is about to happen, you decide.',
         'de':
-            'Eine Fähigkeit wird einmal geschrieben und einmal registriert. '
-            'Der Chat, ein HTTP-Client und jeder MCP-fähige Agent lösen sie in '
-            'derselben Registry auf — es gibt kein eigenes „API-Werkzeug". Was '
-            'etwas verändert, hält vorher an: Das Gateway parkt die Aktion '
-            'hinter einer einmaligen Bestätigung, genau wie der Chat eine '
-            'Bestätigungskarte zeigt.',
+            'Ein klassischer Chat sagt dir, wie etwas geht. Master Chat soll '
+            'dir helfen, es tatsächlich zu tun — und wenn etwas Wichtiges '
+            'passieren soll, entscheidest du.',
       }),
       points: [
         LocalizedText({
-          'en': 'Written once — reachable from chat, HTTP and MCP',
-          'de': 'Einmal geschrieben — erreichbar aus Chat, HTTP und MCP',
-        }),
-        LocalizedText({
-          'en': 'No scope removes a confirmation requirement',
-          'de': 'Kein Scope hebt eine Bestätigungspflicht auf',
-        }),
-        // The honest boundary, stated where the gateway diagram could
-        // otherwise imply that every connected tool does real work.
-        LocalizedText({
-          'en':
-              'The built-in essentials do real work; the connected demo '
-              'tools return sample data',
-          'de':
-              'Die eingebauten Essentials leisten echte Arbeit; die '
-              'angebundenen Demo-Werkzeuge liefern Beispieldaten',
+          'en': 'Understand. Choose. Act. Result.',
+          'de': 'Verstehen. Werkzeug wählen. Ausführen. Ergebnis.',
         }),
       ],
       stage: VisionStage.today,
-      visual: masterChatRegistry,
-      duration: Duration(seconds: 12),
+      // A today scene that still points forward: part of this works now, and
+      // the honest thing is to say how far it reaches.
+      stageNote: LocalizedText({
+        'en':
+            'Today Master Chat carries out single tasks this way. Turning '
+            'them into whole pieces of work is the vision.',
+        'de':
+            'Heute führt Master Chat einzelne Aufgaben so aus. Daraus ganze '
+            'Arbeitsabläufe zu machen, ist die Vision.',
+      }),
+      visual: masterChatFlow,
+      duration: Duration(seconds: 10),
     ),
 
     // ── 8 ─────────────────────────────────────────────────────────────────
@@ -362,20 +295,19 @@ final VisionStory masterChatStory = VisionStory(
       }),
       body: LocalizedText({
         'en':
-            'The apps do not disappear, and neither do their capabilities. '
-            'What goes away is having to orchestrate them by hand — deciding '
-            'which window to open before the work can start. One conversation, '
-            'many capabilities, one shared goal.',
+            'You should not have to stop and ask which app you need, which '
+            'tool to open, or which AI is right for this. You simply say what '
+            'you want to achieve — one conversation, many capabilities, one '
+            'shared goal.',
         'de':
-            'Die Apps verschwinden nicht, und ihre Fähigkeiten auch nicht. '
-            'Was verschwindet, ist die Notwendigkeit, sie von Hand zu '
-            'dirigieren — erst zu entscheiden, welches Fenster man öffnet, '
-            'bevor die Arbeit beginnen kann. Ein Gespräch, viele Fähigkeiten, '
-            'ein gemeinsames Ziel.',
+            'Du sollst nicht mehr überlegen müssen, welche App du brauchst, '
+            'welches Werkzeug du öffnest oder welche KI dafür geeignet ist. Du '
+            'sagst einfach, was du erreichen möchtest — ein Gespräch, viele '
+            'Fähigkeiten, ein gemeinsames Ziel.',
       }),
       stage: VisionStage.vision,
       visual: masterChatStack,
-      duration: Duration(seconds: 9),
+      duration: Duration(seconds: 8),
     ),
   ],
 );

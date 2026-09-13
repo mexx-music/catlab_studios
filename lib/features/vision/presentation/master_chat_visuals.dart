@@ -217,7 +217,7 @@ class _OneSurfacePainter extends VisionScenePainter {
 }
 
 // ---------------------------------------------------------------------------
-// Scene 3 — what it could offer, and what it can run right now
+// Scene 3 — the task arrives, and the capability that fits lights up
 // ---------------------------------------------------------------------------
 
 Widget masterChatCapabilities(BuildContext context, VisionVisualState state) =>
@@ -225,46 +225,38 @@ Widget masterChatCapabilities(BuildContext context, VisionVisualState state) =>
       _CapabilitiesPainter(
         state,
         context.tAll(MasterChatDiagramText.capabilityNames),
-        [
-          context.t(MasterChatDiagramText.capabilityReady),
-          context.t(MasterChatDiagramText.capabilityReady),
-          context.t(MasterChatDiagramText.capabilityInactive),
-          context.t(MasterChatDiagramText.capabilityBlocked),
-        ],
+        context.t(MasterChatDiagramText.yourTask),
       ),
     );
 
 class _CapabilitiesPainter extends VisionScenePainter {
-  const _CapabilitiesPainter(super.state, this.names, this.states);
+  const _CapabilitiesPainter(super.state, this.names, this.taskLabel);
 
   final List<String> names;
-  final List<String> states;
+  final String taskLabel;
 
-  /// Index 0 and 1 can run; 2 is known but its module is off; 3 needs software
-  /// this device cannot verify, so it blocks rather than being assumed.
-  static const int _firstUnavailable = 2;
+  /// The one the task turns out to need. Everything else stays available and
+  /// simply does not light up — which is the point being made.
+  static const int _chosen = 0;
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = scaleOf(size);
 
-    // Sized off the box, not off `s` alone: the labels are absolute pixels,
-    // and on a phone a purely `s`-scaled row collapses under them.
-    final rowWidth = math.min(s * 1.10, size.width * 0.62);
+    // Sized off the box, not off the drawing scale alone: the labels are
+    // absolute pixels, and a purely scaled row collapses under them on a
+    // phone.
+    final rowWidth = math.min(s * 1.00, size.width * 0.56);
     final pitch = math.min(
-      math.max(s * 0.36, 26.0),
+      math.max(s * 0.34, 24.0),
       (size.height - 6) / names.length,
     );
-    final rowHeight = pitch * 0.80;
-    // Below this a row cannot hold two lines of type, so it keeps the name
-    // and lets colour and the dashed link carry the state.
-    final compact = rowHeight < 27 || rowWidth < 124;
+    final rowHeight = pitch * 0.78;
 
-    final hubWidth = math.min(s * 0.40, size.width * 0.13);
     final hubRect = Rect.fromCenter(
-      center: Offset(size.width * 0.13, size.height / 2),
-      width: hubWidth,
-      height: math.min(s * 0.56, pitch * 1.7),
+      center: Offset(size.width * 0.15, size.height / 2),
+      width: math.min(s * 0.44, size.width * 0.15),
+      height: math.min(s * 0.58, pitch * 1.8),
     );
     final hubT = visionStep(entrance, 0, 0.3);
     _panel(
@@ -277,254 +269,228 @@ class _CapabilitiesPainter extends VisionScenePainter {
       titleBar: false,
     );
     if (hubRect.height > 26) _promptLine(canvas, hubRect, hubT, inset: 6);
+    if (s > 95) {
+      visionLabel(
+        canvas,
+        Offset(hubRect.center.dx, hubRect.bottom + s * 0.20),
+        taskLabel,
+        visionStep(entrance, 0.15, 0.45),
+        size: 9.5,
+        color: AppColors.textMuted,
+        weight: FontWeight.w500,
+      );
+    }
 
     final blockTop = size.height / 2 - (names.length * pitch) / 2;
     final rowX = size.width - rowWidth / 2 - 6;
 
     for (var i = 0; i < names.length; i++) {
-      final t = visionStep(entrance, 0.15 + i * 0.12, 0.75 + i * 0.06);
+      final t = visionStep(entrance, 0.15 + i * 0.10, 0.70 + i * 0.06);
       if (t <= 0.01) continue;
       final centreY = blockTop + i * pitch + pitch / 2;
-
-      final available = i < _firstUnavailable;
-      final colour = available
-          ? VisionInk.live
-          : (i == _firstUnavailable ? VisionInk.node : VisionInk.flag);
+      final chosen = i == _chosen;
+      // The match arrives last, so the eye sees the choice being made.
+      final lit = chosen ? visionStep(entrance, 0.62, 0.92) : 0.0;
 
       final rect = Rect.fromCenter(
         center: Offset(rowX, centreY),
         width: rowWidth,
         height: rowHeight,
       );
-
-      // An unavailable capability is still drawn — that is the whole point of
-      // knowing it exists — but its line never becomes solid.
       visionLink(
         canvas,
         Offset(hubRect.right, hubRect.center.dy),
         Offset(rect.left, centreY),
         t,
-        color: colour.withValues(alpha: available ? 0.55 : 0.32),
-        dashed: !available,
+        color: chosen
+            ? VisionInk.focus.withValues(alpha: 0.30 + 0.50 * lit)
+            : VisionInk.line,
       );
-
       _panel(
         canvas,
         rect,
-        t * (available ? 1.0 : 0.75),
-        border: colour.withValues(alpha: available ? 0.8 : 0.5),
+        t,
+        border: chosen
+            ? Color.lerp(VisionInk.line, VisionInk.focus, lit)!
+            : VisionInk.line,
+        borderWidth: chosen ? 1 + 0.4 * lit : 1,
         titleBar: false,
       );
-      visionDot(
-        canvas,
-        Offset(rect.left + 10, centreY),
-        3.0,
-        colour,
-        t * (available ? 1.0 : 0.6),
-      );
-
-      final textX = rect.left + 10 + rowWidth * 0.30;
-      if (compact) {
-        visionLabel(
+      // On a narrow row the marker and the word crowd each other, so the
+      // border colour carries the match on its own and the label centres.
+      final roomForDot = rowWidth >= 150;
+      if (roomForDot) {
+        visionDot(
           canvas,
-          Offset(textX, centreY),
-          names[i],
-          t,
-          size: 9,
-          color: available ? AppColors.textPrimary : AppColors.textMuted,
+          Offset(rect.left + 10, centreY),
+          3.0,
+          chosen ? VisionInk.focus : VisionInk.node,
+          chosen ? t * (0.45 + 0.55 * lit) : t * 0.5,
         );
-        continue;
       }
-      // Name above, state below. Side by side, a longer word for "module not
-      // active" ran straight through the capability's name.
       visionLabel(
         canvas,
-        Offset(textX, centreY - 7),
+        Offset(
+          roomForDot ? rect.left + 10 + rowWidth * 0.32 : rect.center.dx,
+          centreY,
+        ),
         names[i],
         t,
-        size: 10,
-        color: AppColors.textPrimary,
-      );
-      visionLabel(
-        canvas,
-        Offset(textX, centreY + 7),
-        states[i],
-        t * 0.9,
-        size: 8.5,
-        weight: FontWeight.w500,
-        color: available ? AppColors.statusAvailable : AppColors.textMuted,
+        size: 9.5,
+        color: chosen
+            ? Color.lerp(AppColors.textSecondary, AppColors.accent, lit)!
+            : AppColors.textMuted,
       );
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Scene 4 — one state, three hands, and a model that only ever gets a copy
+// Scene 4 — spoken in, calculator out. Shown, not explained.
 // ---------------------------------------------------------------------------
 
 Widget masterChatOneState(BuildContext context, VisionVisualState state) =>
     VisionVisualBox(
-      _OneStatePainter(
-        state,
-        [
-          context.t(MasterChatDiagramText.inputTouch),
-          context.t(MasterChatDiagramText.inputKeys),
-          context.t(MasterChatDiagramText.inputVoice),
-        ],
-        context.t(MasterChatDiagramText.theState),
-        context.t(MasterChatDiagramText.snapshot),
-        context.t(MasterChatDiagramText.intent),
-        context.t(MasterChatDiagramText.model),
-      ),
+      _OneStatePainter(state, context.t(MasterChatDiagramText.spokenPhrase), [
+        context.t(MasterChatDiagramText.inputVoice),
+        context.t(MasterChatDiagramText.inputKeyboard),
+        context.t(MasterChatDiagramText.inputKeys),
+      ]),
     );
 
 class _OneStatePainter extends VisionScenePainter {
-  const _OneStatePainter(
-    super.state,
-    this.inputs,
-    this.stateLabel,
-    this.snapshotLabel,
-    this.intentLabel,
-    this.modelLabel,
-  );
+  const _OneStatePainter(super.state, this.phrase, this.inputs);
 
+  final String phrase;
   final List<String> inputs;
-  final String stateLabel;
-  final String snapshotLabel;
-  final String intentLabel;
-  final String modelLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = scaleOf(size);
-    final core = p(size, -0.14, 0, s);
-    final coreRect = Rect.fromCenter(
-      center: core,
-      width: s * 0.76,
-      height: s * 0.44,
+
+    // 1. What the person says.
+    final said = Rect.fromCenter(
+      center: Offset(size.width * 0.22, size.height * 0.30),
+      width: math.min(s * 0.96, size.width * 0.40),
+      height: s * 0.30,
     );
-
-    // Three hands, arriving one after another, all reaching the same box.
-    for (var i = 0; i < inputs.length; i++) {
-      final y = -0.62 + i * 0.62;
-      final from = p(size, -0.92, y, s);
-      final t = visionStep(entrance, 0.05 + i * 0.10, 0.62);
-      visionLink(
-        canvas,
-        from,
-        Offset(coreRect.left, core.dy),
-        t,
-        color: VisionInk.live.withValues(alpha: 0.5),
-      );
-      if (!still && t > 0.9) {
-        visionPulse(
-          canvas,
-          from,
-          Offset(coreRect.left, core.dy),
-          progress * 0.9 + i * 0.3,
-          VisionInk.live,
-        );
-      }
-      visionDot(canvas, from, 4, VisionInk.live, t);
-      visionLabel(
-        canvas,
-        from + Offset(0, -s * 0.15),
-        inputs[i],
-        t,
-        size: 9.5,
-        color: AppColors.textSecondary,
-      );
-    }
-
-    // The one value. Everything above writes here; nothing keeps a copy.
-    final coreT = visionStep(entrance, 0.30, 0.72);
+    final saidT = visionStep(entrance, 0, 0.28);
     _panel(
       canvas,
-      coreRect,
-      coreT,
+      said,
+      saidT,
       border: VisionInk.focus,
-      borderWidth: 1.3,
+      borderWidth: 1.2,
       fill: AppColors.surface,
       titleBar: false,
     );
     visionLabel(
       canvas,
-      core,
-      stateLabel,
-      coreT,
-      size: 11,
+      said.center,
+      phrase,
+      saidT,
+      size: 10.5,
       color: AppColors.accent,
     );
 
-    // The model is a peer, not the owner: it reads a snapshot and writes back
-    // an intent. Two arrows, deliberately in opposite directions.
-    final modelCentre = p(size, 0.78, 0, s);
-    final modelT = visionStep(entrance, 0.55, 0.95);
-    final modelRect = Rect.fromCenter(
-      center: modelCentre,
-      width: s * 0.40,
-      height: s * 0.30,
+    // 2. The calculator that appears because of it.
+    final calc = Rect.fromCenter(
+      center: Offset(size.width * 0.68, size.height * 0.52),
+      width: math.min(s * 0.86, size.width * 0.36),
+      height: math.min(s * 1.10, size.height * 0.66),
     );
-    _panel(canvas, modelRect, modelT, titleBar: false);
-    visionLabel(
-      canvas,
-      modelCentre,
-      modelLabel,
-      modelT,
-      size: 9.5,
-      color: AppColors.textSecondary,
-    );
-
-    final out = Offset(coreRect.right, core.dy - s * 0.10);
-    final back = Offset(coreRect.right, core.dy + s * 0.10);
+    final calcT = visionEase(visionStep(entrance, 0.30, 0.70));
     visionLink(
       canvas,
-      out,
-      Offset(modelRect.left, modelCentre.dy - s * 0.10),
-      visionStep(entrance, 0.62, 0.9),
-      color: VisionInk.node.withValues(alpha: 0.6),
+      Offset(said.right, said.center.dy),
+      Offset(calc.left, calc.top + calc.height * 0.18),
+      visionStep(entrance, 0.24, 0.50),
+      color: VisionInk.focus.withValues(alpha: 0.55),
     );
-    visionLink(
-      canvas,
-      Offset(modelRect.left, modelCentre.dy + s * 0.10),
-      back,
-      visionStep(entrance, 0.72, 1.0),
-      color: VisionInk.focus.withValues(alpha: 0.7),
-    );
-    // On a phone these two words crowd the model panel; the arrows still
-    // carry the direction, and the body text explains it.
-    if (s > 115) {
-      visionLabel(
+    if (calcT > 0.01) {
+      _panel(
         canvas,
-        Offset((out.dx + modelRect.left) / 2, out.dy - s * 0.13),
-        snapshotLabel,
-        visionStep(entrance, 0.70, 0.95),
-        size: 8.5,
-        weight: FontWeight.w500,
-        color: AppColors.textMuted,
+        calc,
+        calcT,
+        border: VisionInk.focus,
+        borderWidth: 1.3,
+        fill: AppColors.surface,
+        titleBar: false,
+      );
+      // The display, then the result landing in it.
+      final display = Rect.fromLTWH(
+        calc.left + 8,
+        calc.top + 8,
+        calc.width - 16,
+        calc.height * 0.22,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(display, const Radius.circular(5)),
+        Paint()..color = AppColors.background.withValues(alpha: 0.8 * calcT),
       );
       visionLabel(
         canvas,
-        Offset((back.dx + modelRect.left) / 2, back.dy + s * 0.13),
-        intentLabel,
-        visionStep(entrance, 0.80, 1.0),
-        size: 8.5,
-        weight: FontWeight.w500,
+        Offset(display.right - 16, display.center.dy),
+        '66',
+        visionStep(entrance, 0.72, 0.95),
+        size: 13,
         color: AppColors.accent,
+        weight: FontWeight.w700,
       );
+      // A hint of a keypad: enough to read as one, not a real calculator.
+      for (var r = 0; r < 3; r++) {
+        for (var c = 0; c < 3; c++) {
+          final key = Offset(
+            calc.left + calc.width * (0.25 + c * 0.25),
+            display.bottom + calc.height * (0.18 + r * 0.22),
+          );
+          visionDot(
+            canvas,
+            key,
+            2.6,
+            VisionInk.node,
+            visionStep(entrance, 0.55 + (r * 3 + c) * 0.015, 0.85) * 0.7,
+            glow: 1.6,
+          );
+        }
+      }
+    }
+
+    // 3. The three hands that all reach the same calculator.
+    if (s > 92) {
+      for (var i = 0; i < inputs.length; i++) {
+        final t = visionStep(entrance, 0.70 + i * 0.07, 1.0);
+        final at = Offset(size.width * 0.20, size.height * (0.62 + i * 0.13));
+        visionLink(
+          canvas,
+          at,
+          Offset(calc.left, calc.center.dy),
+          t,
+          color: VisionInk.live.withValues(alpha: 0.40),
+        );
+        visionDot(canvas, at, 3.2, VisionInk.live, t);
+        visionLabel(
+          canvas,
+          Offset(at.dx - s * 0.26, at.dy),
+          inputs[i],
+          t,
+          size: 9,
+          color: AppColors.textSecondary,
+        );
+      }
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Scene 5 — capabilities inside one context, not in separate windows
+// Scene 5 — three steps that belong to one piece of work
 // ---------------------------------------------------------------------------
 
 Widget masterChatContext(BuildContext context, VisionVisualState state) =>
     VisionVisualBox(
       _ContextPainter(
         state,
-        context.tAll(MasterChatDiagramText.capabilityNames),
+        context.tAll(MasterChatDiagramText.flowSteps),
         context.t(MasterChatDiagramText.workingContext),
         context.t(MasterChatDiagramText.separateWindows),
       ),
@@ -554,22 +520,24 @@ class _ContextPainter extends VisionScenePainter {
         fadeOut * 0.55,
       );
     }
-    visionLabel(
-      canvas,
-      p(size, 0, -0.44, s),
-      oldWay,
-      fadeOut * 0.6,
-      size: 9,
-      weight: FontWeight.w500,
-      color: AppColors.textMuted,
-    );
+    if (s > 95) {
+      visionLabel(
+        canvas,
+        p(size, 0, -0.44, s),
+        oldWay,
+        fadeOut * 0.6,
+        size: 9,
+        weight: FontWeight.w500,
+        color: AppColors.textMuted,
+      );
+    }
 
-    // One container, holding everything that follows.
+    // One container, holding every step of the same job.
     final band = visionEase(visionStep(entrance, 0.25, 0.7));
     if (band <= 0.01) return;
     final container = Rect.fromCenter(
       center: p(size, 0, 0.12, s),
-      width: s * 1.86 * band,
+      width: math.min(s * 1.86, size.width * 0.92) * band,
       height: s * 0.66,
     );
     canvas.drawRRect(
@@ -580,7 +548,6 @@ class _ContextPainter extends VisionScenePainter {
         ..color = VisionInk.focus.withValues(alpha: 0.45 * band),
     );
 
-    // A thread running through every capability: the same piece of work.
     final threadY = container.center.dy;
     visionLink(
       canvas,
@@ -591,13 +558,13 @@ class _ContextPainter extends VisionScenePainter {
     );
 
     for (var i = 0; i < names.length; i++) {
-      final t = visionStep(entrance, 0.40 + i * 0.09, 0.92);
+      final t = visionStep(entrance, 0.40 + i * 0.11, 0.92);
       if (t <= 0.01) continue;
-      final x = container.left + container.width * (0.16 + i * 0.226);
+      final x = container.left + container.width * (0.20 + i * 0.30);
       final rect = Rect.fromCenter(
         center: Offset(x, threadY),
-        width: s * 0.38,
-        height: s * 0.24,
+        width: container.width * 0.26,
+        height: s * 0.26,
       );
       _panel(canvas, rect, t, titleBar: false);
       visionLabel(
@@ -605,7 +572,7 @@ class _ContextPainter extends VisionScenePainter {
         Offset(x, threadY),
         names[i],
         t,
-        size: 8.5,
+        size: 9,
         color: AppColors.textSecondary,
       );
     }
@@ -624,124 +591,101 @@ class _ContextPainter extends VisionScenePainter {
       caption,
       visionStep(entrance, 0.8, 1.0),
       color: AppColors.accent,
-      size: 10.5,
+      size: 10,
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Scene 6 — one interface, more than one intelligence
+// Scene 6 — one task, several specialists, one result
 // ---------------------------------------------------------------------------
 
 Widget masterChatIntelligences(BuildContext context, VisionVisualState state) =>
     VisionVisualBox(
       _IntelligencesPainter(
         state,
-        context.tAll(MasterChatDiagramText.providers),
-        context.t(MasterChatDiagramText.providerInterface),
+        context.t(MasterChatDiagramText.yourTask),
         context.tAll(MasterChatDiagramText.specialists),
+        context.t(MasterChatDiagramText.broughtTogether),
       ),
     );
 
 class _IntelligencesPainter extends VisionScenePainter {
   const _IntelligencesPainter(
     super.state,
-    this.providers,
-    this.interfaceLabel,
+    this.taskLabel,
     this.specialists,
+    this.mergeLabel,
   );
 
-  final List<String> providers;
-  final String interfaceLabel;
+  final String taskLabel;
   final List<String> specialists;
+  final String mergeLabel;
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = scaleOf(size);
 
-    // Solid above the bar: two adapters behind one interface exist today.
-    for (var i = 0; i < providers.length; i++) {
-      final at = p(size, -0.42 + i * 0.84, -0.74, s);
-      final t = visionStep(entrance, i * 0.10, 0.45);
-      final rect = Rect.fromCenter(
-        center: at,
-        width: s * 0.56,
-        height: s * 0.26,
-      );
-      _panel(canvas, rect, t, titleBar: false);
-      visionLabel(
-        canvas,
-        at,
-        providers[i],
-        t,
-        size: 9.5,
-        color: AppColors.textSecondary,
-      );
-      visionLink(
-        canvas,
-        Offset(at.dx, rect.bottom),
-        Offset(at.dx, p(size, 0, -0.36, s).dy),
-        t,
-        color: VisionInk.live.withValues(alpha: 0.5),
-      );
-    }
-
-    final barT = visionStep(entrance, 0.22, 0.55);
     final bar = Rect.fromCenter(
-      center: p(size, 0, -0.30, s),
-      width: s * 1.70,
-      height: s * 0.17,
+      center: p(size, 0, -0.62, s),
+      width: math.min(s * 1.40, size.width * 0.62),
+      height: s * 0.26,
     );
+    final barT = visionStep(entrance, 0, 0.35);
     _panel(
       canvas,
       bar,
       barT,
       border: VisionInk.focus,
       borderWidth: 1.2,
+      fill: AppColors.surface,
       titleBar: false,
     );
     visionLabel(
       canvas,
       bar.center,
-      interfaceLabel,
+      taskLabel,
       barT,
-      size: 9,
+      size: 10,
       color: AppColors.accent,
     );
 
-    // Dashed below it: splitting a task across specialists is the direction,
-    // not something that runs. The picture says so before the words do.
-    final merge = p(size, 0, 0.82, s);
+    // Dashed throughout: several specialists working on one task is the
+    // direction, so the picture says so before the words do.
+    final merge = p(size, 0, 0.76, s);
+    final spread = math.min(s * 0.48, size.width * 0.21);
     for (var i = 0; i < specialists.length; i++) {
-      final x = -0.66 + i * 0.44;
-      final at = p(size, x, 0.24, s);
-      final t = visionStep(entrance, 0.42 + i * 0.08, 0.88);
+      final at = Offset(
+        size.width / 2 + (i - (specialists.length - 1) / 2) * spread,
+        p(size, 0, 0.10, s).dy,
+      );
+      final t = visionStep(entrance, 0.32 + i * 0.09, 0.82);
       if (t <= 0.01) continue;
       visionLink(
         canvas,
         Offset(at.dx, bar.bottom),
-        Offset(at.dx, at.dy - s * 0.13),
+        Offset(at.dx, at.dy - s * 0.14),
         t,
         color: VisionInk.node.withValues(alpha: 0.5),
         dashed: true,
       );
       final rect = Rect.fromCenter(
         center: at,
-        width: s * 0.40,
-        height: s * 0.22,
+        width: spread * 0.86,
+        height: s * 0.24,
       );
-      _panel(canvas, rect, t * 0.8, titleBar: false);
+      _panel(canvas, rect, t * 0.85, titleBar: false);
       visionLabel(canvas, at, specialists[i], t * 0.9, size: 8.5);
       visionLink(
         canvas,
         Offset(at.dx, rect.bottom),
         merge,
-        visionStep(entrance, 0.62 + i * 0.06, 1.0),
+        visionStep(entrance, 0.55 + i * 0.06, 1.0),
         color: VisionInk.node.withValues(alpha: 0.4),
         dashed: true,
       );
     }
-    final mergeT = visionStep(entrance, 0.80, 1.0);
+    final mergeT = visionStep(entrance, 0.76, 1.0);
     canvas.drawCircle(
       merge,
       s * 0.13,
@@ -751,141 +695,116 @@ class _IntelligencesPainter extends VisionScenePainter {
         ..color = VisionInk.focus.withValues(alpha: 0.55 * mergeT),
     );
     visionDot(canvas, merge, 4, VisionInk.focus, mergeT);
+    if (s > 95) {
+      visionLabel(
+        canvas,
+        Offset(merge.dx, merge.dy + s * 0.30),
+        mergeLabel,
+        visionStep(entrance, 0.85, 1.0),
+        size: 9,
+        color: AppColors.accent,
+      );
+    }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Scene 7 — three doors, one registry, one gate
+// Scene 7 — understand, choose, act, result — and the gate where you decide
 // ---------------------------------------------------------------------------
 
-Widget masterChatRegistry(BuildContext context, VisionVisualState state) =>
+Widget masterChatFlow(BuildContext context, VisionVisualState state) =>
     VisionVisualBox(
-      _RegistryPainter(
+      _FlowPainter(
         state,
-        context.tAll(MasterChatDiagramText.doors),
-        context.t(MasterChatDiagramText.registry),
-        context.t(MasterChatDiagramText.confirmGate),
+        context.tAll(MasterChatDiagramText.actionSteps),
+        context.t(MasterChatDiagramText.youDecide),
       ),
     );
 
-class _RegistryPainter extends VisionScenePainter {
-  const _RegistryPainter(
-    super.state,
-    this.doors,
-    this.registryLabel,
-    this.gateLabel,
-  );
+class _FlowPainter extends VisionScenePainter {
+  const _FlowPainter(super.state, this.steps, this.gateLabel);
 
-  final List<String> doors;
-  final String registryLabel;
+  final List<String> steps;
   final String gateLabel;
+
+  /// The gate sits before the step that actually changes something.
+  static const int _gateBefore = 2;
 
   @override
   void paint(Canvas canvas, Size size) {
     final s = scaleOf(size);
-    final registry = Rect.fromCenter(
-      center: p(size, 0.04, 0, s),
-      width: s * 0.52,
-      height: s * 1.16,
-    );
 
-    // Three ways in, deliberately identical: the point is that none of them
-    // is special.
-    for (var i = 0; i < doors.length; i++) {
-      final at = p(size, -0.80, -0.56 + i * 0.56, s);
-      final t = visionStep(entrance, i * 0.10, 0.5);
+    // A vertical chain reads better than a horizontal one here: four labels
+    // side by side would each get a third of the width a word needs.
+    final count = steps.length;
+    final pitch = math.min(math.max(s * 0.42, 30.0), (size.height - 8) / count);
+    final boxW = math.min(s * 1.20, size.width * 0.62);
+    final boxH = pitch * 0.62;
+    final top = size.height / 2 - (count * pitch) / 2;
+    final cx = size.width * 0.52;
+
+    for (var i = 0; i < count; i++) {
+      final t = visionEase(visionStep(entrance, i * 0.13, 0.45 + i * 0.13));
+      if (t <= 0.01) continue;
+      final centreY = top + i * pitch + pitch / 2;
       final rect = Rect.fromCenter(
-        center: at,
-        width: s * 0.42,
-        height: s * 0.26,
+        center: Offset(cx, centreY),
+        width: boxW,
+        height: boxH,
       );
-      _panel(canvas, rect, t, titleBar: false);
-      visionLabel(
-        canvas,
-        at,
-        doors[i],
-        t,
-        size: 9,
-        color: AppColors.textSecondary,
-      );
-      visionLink(
-        canvas,
-        Offset(rect.right, at.dy),
-        Offset(registry.left, registry.center.dy),
-        t,
-        color: VisionInk.live.withValues(alpha: 0.5),
-      );
-      if (!still && t > 0.9) {
-        visionPulse(
+      final last = i == count - 1;
+
+      if (i > 0) {
+        visionLink(
           canvas,
-          Offset(rect.right, at.dy),
-          Offset(registry.left, registry.center.dy),
-          progress * 0.8 + i * 0.33,
-          VisionInk.live,
+          Offset(cx, centreY - pitch / 2 - boxH * 0.06),
+          Offset(cx, rect.top),
+          visionStep(entrance, i * 0.13 - 0.05, 0.4 + i * 0.13),
+          color: VisionInk.line,
         );
       }
+      _panel(
+        canvas,
+        rect,
+        t,
+        border: last ? VisionInk.focus : VisionInk.line,
+        borderWidth: last ? 1.3 : 1,
+        fill: last ? AppColors.surface : AppColors.surfaceVariant,
+        titleBar: false,
+      );
+      visionLabel(
+        canvas,
+        rect.center,
+        steps[i],
+        t,
+        size: 10,
+        color: last ? AppColors.accent : AppColors.textSecondary,
+      );
+
+      // The one place the chain waits for a person.
+      if (i == _gateBefore) {
+        final gateT = visionStep(entrance, 0.55, 0.85);
+        final gateY = rect.top - (pitch - boxH) / 2;
+        canvas.drawLine(
+          Offset(cx - boxW * 0.30, gateY),
+          Offset(cx + boxW * 0.30, gateY),
+          Paint()
+            ..strokeWidth = 1.6
+            ..strokeCap = StrokeCap.round
+            ..color = VisionInk.focus.withValues(alpha: 0.85 * gateT),
+        );
+        if (s > 88) {
+          visionLabel(
+            canvas,
+            Offset(cx + boxW * 0.30 + s * 0.34, gateY),
+            gateLabel,
+            gateT,
+            size: 9,
+            color: AppColors.accent,
+          );
+        }
+      }
     }
-
-    final regT = visionStep(entrance, 0.30, 0.65);
-    _panel(
-      canvas,
-      registry,
-      regT,
-      border: VisionInk.live,
-      borderWidth: 1.2,
-      fill: AppColors.surface,
-      titleBar: false,
-    );
-    visionLabel(
-      canvas,
-      registry.center,
-      registryLabel,
-      regT,
-      size: 9.5,
-      color: AppColors.textPrimary,
-    );
-
-    // The gate is the only gold thing here, because it is the only thing that
-    // can refuse.
-    final gateT = visionStep(entrance, 0.55, 0.9);
-    final gate = Rect.fromCenter(
-      center: p(size, 0.62, 0, s),
-      width: s * 0.34,
-      height: s * 0.56,
-    );
-    visionLink(
-      canvas,
-      Offset(registry.right, registry.center.dy),
-      Offset(gate.left, gate.center.dy),
-      gateT,
-      color: VisionInk.focus.withValues(alpha: 0.6),
-    );
-    _panel(
-      canvas,
-      gate,
-      gateT,
-      border: VisionInk.focus,
-      borderWidth: 1.3,
-      titleBar: false,
-    );
-    visionLabel(
-      canvas,
-      Offset(gate.center.dx, gate.bottom + s * 0.18),
-      gateLabel,
-      visionStep(entrance, 0.7, 1.0),
-      size: 9.5,
-      color: AppColors.accent,
-    );
-
-    final runT = visionStep(entrance, 0.78, 1.0);
-    visionLink(
-      canvas,
-      Offset(gate.right, gate.center.dy),
-      p(size, 0.92, 0, s),
-      runT,
-      color: VisionInk.focus.withValues(alpha: 0.5),
-    );
-    visionDot(canvas, p(size, 0.94, 0, s), 5, VisionInk.focus, runT, glow: 3.6);
   }
 }
 

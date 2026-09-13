@@ -416,13 +416,9 @@ void main() {
             reason: '"${scene.id}" makes vision claims with no today note',
           );
         }
-        if (scene.stage == VisionStage.today) {
-          expect(
-            scene.stageNote,
-            isNull,
-            reason: 'a today scene needs no counterweight',
-          );
-        }
+        // A today scene may carry a note as well. Master Chat's seventh
+        // scene works now *and* points further, and a rule forbidding that
+        // would have forced the dishonest half of the sentence.
       }
     });
 
