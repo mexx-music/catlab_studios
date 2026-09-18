@@ -7,6 +7,7 @@ import 'package:catlab_studios/features/home/presentation/sections/connected_pro
 import 'package:catlab_studios/features/home/presentation/sections/featured_apps_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/footer_section.dart';
 import 'package:catlab_studios/features/home/presentation/sections/hero_section.dart';
+import 'package:catlab_studios/features/product_experience/presentation/product_experience_section.dart';
 
 /// Landing page — composes all sections in order.
 ///
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage> {
               apps: AppProjectsRepository.all,
             ),
             const ConnectedProductsSection(),
+            const ProductExperienceSection(),
             CapabilitiesSection(key: _capabilitiesKey),
             const AboutSection(),
             const FooterSection(),

@@ -44,6 +44,11 @@ dependencies:
   # Opens verified store / web links from the portfolio cards.
   url_launcher: ^6.3.2
 
+  # Browser APIs, used in exactly one place: embedding a real <video> element
+  # for the product-experience films. A video plugin would add a player to
+  # every platform build for a site that only ever ships to the browser.
+  web: ^1.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -75,6 +80,7 @@ flutter:
     - assets/images/hero/
     - assets/images/app_icons/
     - assets/images/products/
+    - assets/images/showcase/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

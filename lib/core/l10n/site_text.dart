@@ -79,6 +79,148 @@ abstract final class SiteText {
     'de': 'Passende App',
   });
 
+  // ── Product experiences ─────────────────────────────────────────────────
+  static const experienceBadge = LocalizedText({
+    'en': 'PROGRAMMED PRODUCT EXPERIENCES',
+    'de': 'PROGRAMMIERTE PRODUKTINSZENIERUNG',
+  });
+  static const experienceTitle = LocalizedText({
+    'en': 'Product Experiences',
+    'de': 'Produktinszenierung',
+  });
+  static const experienceClaim = LocalizedText({
+    'en': 'Your product. Exactly as it is. Brought to life.',
+    'de': 'Ihr Produkt. Genau so, wie es ist. Zum Leben erweckt.',
+  });
+  static const experienceIntro = LocalizedText({
+    'en':
+        'Some products need more than a screenshot. We stage real ones — '
+        'their own photography, their own logo, their own app screens — and '
+        'program the light, the movement, the timing and the sound around '
+        'them.',
+    'de':
+        'Manche Produkte brauchen mehr als einen Screenshot. Wir inszenieren '
+        'echte — mit ihren eigenen Fotos, ihrem eigenen Logo, ihren eigenen '
+        'App-Screens — und programmieren Licht, Bewegung, Timing und Ton '
+        'darum herum.',
+  });
+
+  // Principle stage — the same photograph, before and after staging.
+  static const experiencePrincipleTitle = LocalizedText({
+    'en': 'One image. Everything around it is code.',
+    'de': 'Ein Bild. Alles darum herum ist Code.',
+  });
+  static const experiencePrincipleBody = LocalizedText({
+    'en':
+        'Both halves below are the same original product photograph. The '
+        'right one is not a new picture of the product — it is the product '
+        'with light, depth, particles and frequency lines drawn around it, '
+        'frame by frame. Drag the handle.',
+    'de':
+        'Beide Hälften unten zeigen dasselbe originale Produktfoto. Rechts '
+        'ist kein neues Bild des Produkts — es ist das Produkt, um das Licht, '
+        'Tiefe, Partikel und Frequenzlinien gezeichnet werden, Bild für Bild. '
+        'Ziehen Sie den Griff.',
+  });
+  static const experienceBefore = LocalizedText({
+    'en': 'Original asset',
+    'de': 'Originalmaterial',
+  });
+  static const experienceAfter = LocalizedText({
+    'en': 'Staged',
+    'de': 'Inszeniert',
+  });
+
+  // The honest distinction from generative video.
+  static const experienceContrastTitle = LocalizedText({
+    'en': 'Spectacle where it helps. Precision where it counts.',
+    'de': 'Spektakel dort, wo es hilft. Präzision dort, wo es zählt.',
+  });
+  static const experienceContrastBody = LocalizedText({
+    'en':
+        'Generative AI makes striking film, and it is the right tool when a '
+        'scene may be invented. A product presentation is a different '
+        'problem: geometry, logo, interface, wording and functions have to '
+        'survive unchanged. So we do not generate the product — we stage the '
+        'real one.',
+    'de':
+        'Generative KI erzeugt beeindruckende Filme und ist das richtige '
+        'Werkzeug, wenn eine Szene erfunden werden darf. Eine '
+        'Produktpräsentation ist ein anderes Problem: Geometrie, Logo, '
+        'Oberfläche, Texte und Funktionen müssen unverändert bleiben. Also '
+        'erzeugen wir das Produkt nicht — wir inszenieren das echte.',
+  });
+
+  // Reference block.
+  static const experienceReferenceLabel = LocalizedText({
+    'en': 'REFERENCE',
+    'de': 'REFERENZ',
+  });
+  static const experiencePlay = LocalizedText({
+    'en': 'Play film',
+    'de': 'Film abspielen',
+  });
+  static const experienceSoundHint = LocalizedText({
+    'en': 'Plays with sound',
+    'de': 'Spielt mit Ton',
+  });
+  static const experienceCardsTitle = LocalizedText({
+    'en': 'Campaign cards from the same system',
+    'de': 'Kampagnenkarten aus demselben System',
+  });
+  static const experienceCardsNote = LocalizedText({
+    'en':
+        'Product staging is the communication itself. Distributing it — as a '
+        'Telegram campaign, an ad or a website hero — is a separate step, and '
+        'these cards are built to feed it.',
+    'de':
+        'Produktinszenierung ist die Kommunikation selbst. Ihre Verteilung — '
+        'als Telegram-Kampagne, als Anzeige oder als Website-Hero — ist ein '
+        'eigener Schritt, und diese Karten sind dafür gemacht.',
+  });
+
+  // What comes out of it, and in which shapes.
+  static const experienceOutputsTitle = LocalizedText({
+    'en': 'What we build from it',
+    'de': 'Was daraus entsteht',
+  });
+  static const experienceFormatsTitle = LocalizedText({
+    'en': 'Delivered in the shape the channel needs',
+    'de': 'Ausgeliefert in der Form, die der Kanal braucht',
+  });
+  static const outputLaunchFilm = LocalizedText({
+    'en': 'Product launch films',
+    'de': 'Produkt-Launchfilme',
+  });
+  static const outputDeviceShowcase = LocalizedText({
+    'en': 'App & device showcases',
+    'de': 'App- & Geräte-Showcases',
+  });
+  static const outputSocialSpot = LocalizedText({
+    'en': 'Social product spots',
+    'de': 'Social-Produkt-Spots',
+  });
+  static const outputCampaignCard = LocalizedText({
+    'en': 'Campaign cards',
+    'de': 'Kampagnenkarten',
+  });
+  static const outputHeroAnimation = LocalizedText({
+    'en': 'Website hero animations',
+    'de': 'Website-Hero-Animationen',
+  });
+  static const outputFeatureDemo = LocalizedText({
+    'en': 'Feature demonstrations',
+    'de': 'Feature-Demonstrationen',
+  });
+  static const outputExplainer = LocalizedText({
+    'en': 'Product explainers',
+    'de': 'Produkt-Explainer',
+  });
+  static const outputInteractive = LocalizedText({
+    'en': 'Interactive product experiences',
+    'de': 'Interaktive Produkt-Experiences',
+  });
+
   // ── Capabilities ────────────────────────────────────────────────────────
   static const capabilitiesTitle = LocalizedText({
     'en': 'What We Build',
