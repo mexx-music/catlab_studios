@@ -24,6 +24,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _portfolioKey = GlobalKey();
   final _capabilitiesKey = GlobalKey();
+  final _experienceKey = GlobalKey();
 
   void _scrollTo(GlobalKey key) {
     final context = key.currentContext;
@@ -45,13 +46,14 @@ class _HomePageState extends State<HomePage> {
             HeroSection(
               onExploreApps: () => _scrollTo(_portfolioKey),
               onWhatWeBuild: () => _scrollTo(_capabilitiesKey),
+              onProductExperiences: () => _scrollTo(_experienceKey),
             ),
             FeaturedAppsSection(
               key: _portfolioKey,
               apps: AppProjectsRepository.all,
             ),
             const ConnectedProductsSection(),
-            const ProductExperienceSection(),
+            ProductExperienceSection(key: _experienceKey),
             CapabilitiesSection(key: _capabilitiesKey),
             const AboutSection(),
             const FooterSection(),

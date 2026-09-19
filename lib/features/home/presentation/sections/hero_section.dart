@@ -11,6 +11,7 @@ class HeroSection extends StatelessWidget {
     super.key,
     required this.onExploreApps,
     required this.onWhatWeBuild,
+    required this.onProductExperiences,
   });
 
   /// Scrolls the page to the portfolio section.
@@ -18,6 +19,9 @@ class HeroSection extends StatelessWidget {
 
   /// Scrolls the page to the capabilities section.
   final VoidCallback onWhatWeBuild;
+
+  /// Scrolls the page to the product-experience section.
+  final VoidCallback onProductExperiences;
 
   static const _heroImage = 'assets/images/hero/catwebback.png';
 
@@ -69,6 +73,7 @@ class HeroSection extends StatelessWidget {
           _HeroContent(
             onExploreApps: onExploreApps,
             onWhatWeBuild: onWhatWeBuild,
+            onProductExperiences: onProductExperiences,
           ),
 
           // ── Layer 6: Language ──────────────────────────────────────────
@@ -92,10 +97,12 @@ class _HeroContent extends StatelessWidget {
   const _HeroContent({
     required this.onExploreApps,
     required this.onWhatWeBuild,
+    required this.onProductExperiences,
   });
 
   final VoidCallback onExploreApps;
   final VoidCallback onWhatWeBuild;
+  final VoidCallback onProductExperiences;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +136,11 @@ class _HeroContent extends StatelessWidget {
                 isNarrow: isNarrow,
                 onExploreApps: onExploreApps,
                 onWhatWeBuild: onWhatWeBuild,
+              ),
+              const SizedBox(height: 22),
+              _ExperienceTeaser(
+                isNarrow: isNarrow,
+                onTap: onProductExperiences,
               ),
             ],
           ),
@@ -469,6 +481,224 @@ class _GlowOrb extends StatelessWidget {
         shape: BoxShape.circle,
         gradient: RadialGradient(colors: [color, Colors.transparent]),
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Product-experience teaser — a line, not a button
+//
+// The newest field of work needs to be discoverable in the first screen, but
+// it must not read as a third equal call to action. So it is deliberately
+// quieter than the CTAs above it: no filled shape, one hairline of gold down
+// the left, small type, and a slow breathing dot that stops entirely under
+// reduced motion. On a phone the two lines stack and the whole thing stays
+// one tap target.
+//
+// AI-hint: if this ever needs to shout, the answer is a different element —
+// not a louder version of this one.
+// ---------------------------------------------------------------------------
+class _ExperienceTeaser extends StatefulWidget {
+  const _ExperienceTeaser({required this.isNarrow, required this.onTap});
+
+  final bool isNarrow;
+  final VoidCallback onTap;
+
+  @override
+  State<_ExperienceTeaser> createState() => _ExperienceTeaserState();
+}
+
+class _ExperienceTeaserState extends State<_ExperienceTeaser>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: const Duration(seconds: 4),
+  );
+
+  bool _hovered = false;
+  bool _reduced = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduced = MediaQuery.disableAnimationsOf(context);
+    if (reduced == _reduced && (_breath.isAnimating || reduced)) return;
+    _reduced = reduced;
+    if (reduced) {
+      _breath.stop();
+      _breath.value = 0.5;
+    } else {
+      _breath.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isNarrow = widget.isNarrow;
+
+    return Semantics(
+      button: true,
+      label:
+          '${context.t(SiteText.heroTeaserLabel)} — '
+          '${context.t(SiteText.heroTeaserLine)}',
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: _hovered ? 0.34 : 0.22),
+              borderRadius: BorderRadius.circular(12),
+              border: Border(
+                left: BorderSide(
+                  color: AppColors.accent.withValues(
+                    alpha: _hovered ? 0.95 : 0.6,
+                  ),
+                  width: 2,
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(
+                    alpha: _hovered ? 0.16 : 0.0,
+                  ),
+                  blurRadius: 24,
+                  spreadRadius: -8,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: isNarrow
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _BreathingDot(animation: _breath, hovered: _hovered),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        context.t(SiteText.heroTeaserLabel),
+                        textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+                        style: TextStyle(
+                          color: AppColors.accent.withValues(alpha: 0.92),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.8,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                // On a phone the sentence and the action stack rather than
+                // squeezing onto one line.
+                Wrap(
+                  alignment: isNarrow
+                      ? WrapAlignment.center
+                      : WrapAlignment.start,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Text(
+                      context.t(SiteText.heroTeaserLine),
+                      textAlign: isNarrow ? TextAlign.center : TextAlign.start,
+                      style: const TextStyle(
+                        color: Color(0xE6F0F0F8),
+                        fontSize: 13.5,
+                        height: 1.4,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AnimatedSlide(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          offset: _hovered && !_reduced
+                              ? const Offset(0.16, 0)
+                              : Offset.zero,
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 13,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          context.t(SiteText.heroTeaserAction),
+                          style: TextStyle(
+                            color: AppColors.accent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            decoration: _hovered
+                                ? TextDecoration.underline
+                                : TextDecoration.none,
+                            decorationColor: AppColors.accent.withValues(
+                              alpha: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The one moving part: a small gold dot that breathes, the way a "live" or
+/// "new" marker does. Pinned at half brightness under reduced motion.
+class _BreathingDot extends StatelessWidget {
+  const _BreathingDot({required this.animation, required this.hovered});
+
+  final Animation<double> animation;
+  final bool hovered;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        final glow = 0.3 + animation.value * 0.5 + (hovered ? 0.2 : 0.0);
+        return Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.accent,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.accent.withValues(
+                  alpha: glow.clamp(0.0, 1.0) * 0.8,
+                ),
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

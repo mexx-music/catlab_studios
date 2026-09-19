@@ -91,6 +91,46 @@ void main() {
     });
   });
 
+  group('the hero teaser', () {
+    testWidgets('points at the new field of work in both languages', (
+      tester,
+    ) async {
+      await _pumpSite(tester);
+      expect(find.text('NEW · PRODUCT EXPERIENCES'), findsOneWidget);
+      expect(
+        find.text('Real products. Precisely brought to life.'),
+        findsOneWidget,
+      );
+      expect(find.text('Discover'), findsOneWidget);
+
+      await _pumpSite(tester, locale: const Locale('de'));
+      expect(find.text('NEU · PRODUCT EXPERIENCES'), findsOneWidget);
+      expect(find.text('Echte Produkte. Präzise inszeniert.'), findsOneWidget);
+      expect(find.text('Entdecken'), findsOneWidget);
+    });
+
+    testWidgets('scrolls the page down to the section when tapped', (
+      tester,
+    ) async {
+      // A short viewport, so the section really is off-screen to begin with.
+      await _pumpSite(tester, size: const Size(1280, 900));
+      final scrollable = find.byType(Scrollable).first;
+      expect(tester.widget<Scrollable>(scrollable).controller?.offset ?? 0, 0);
+
+      await tester.tap(find.text('Discover'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 800));
+
+      final position = tester.state<ScrollableState>(scrollable).position;
+      expect(
+        position.pixels,
+        greaterThan(0),
+        reason: 'the teaser did not move the page',
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('the section on the landing page', () {
     testWidgets('renders with a frame for every film', (tester) async {
       await _pumpSite(tester);

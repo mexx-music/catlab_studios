@@ -38,6 +38,21 @@ abstract final class SiteText {
     'de': 'Was wir bauen',
   });
 
+  // Hero teaser for the newest field of work. Small on purpose: it points at
+  // the product-experience section, it does not compete with the two CTAs.
+  static const heroTeaserLabel = LocalizedText({
+    'en': 'NEW · PRODUCT EXPERIENCES',
+    'de': 'NEU · PRODUCT EXPERIENCES',
+  });
+  static const heroTeaserLine = LocalizedText({
+    'en': 'Real products. Precisely brought to life.',
+    'de': 'Echte Produkte. Präzise inszeniert.',
+  });
+  static const heroTeaserAction = LocalizedText({
+    'en': 'Discover',
+    'de': 'Entdecken',
+  });
+
   // ── Portfolio ───────────────────────────────────────────────────────────
   static const portfolioTitle = LocalizedText({
     'en': 'Our Apps',
