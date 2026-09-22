@@ -563,11 +563,14 @@ abstract final class AppProjectsRepository {
       }),
       description: LocalizedText({
         'en':
-            'DriveTime Arrival estimates realistic arrival times for '
-            'professional drivers, taking route and ferry timetables into '
-            'account rather than assuming a car\'s average speed.',
+            'DriveTime Arrival plans a tour the way a driver actually drives '
+            'it: Google\'s car times are capped to truck speeds per stretch of '
+            'road, breaks, daily and weekly rests are placed along the way, '
+            'and a ferry is planned with its real departure rather than as a '
+            'rough crossing time. The result is an arrival time, a timeline '
+            'and a map of the route — not just a distance.',
         'de':
-            'DriveTime Arrival schätzt realistische Ankunftszeiten für Berufsfahrer — auf Basis von Route und Fährfahrplänen statt der Durchschnittsgeschwindigkeit eines Pkw.',
+            'DriveTime Arrival plant eine Tour so, wie sie wirklich gefahren wird: Googles Pkw-Zeiten werden je Streckenabschnitt auf Lkw-Tempo gedeckelt, Pausen sowie Tages- und Wochenruhezeiten unterwegs eingeplant, und eine Fähre wird mit ihrer echten Abfahrt gerechnet statt mit einer groben Überfahrtsdauer. Heraus kommen Ankunftszeit, Zeitstrahl und Karte der Strecke — nicht nur eine Entfernung.',
       }),
       // TODO(assets): drivetimearrival still ships the default Flutter icon —
       // no real app icon exists yet. Falls back to the CatLab gradient tile.
@@ -577,7 +580,7 @@ abstract final class AppProjectsRepository {
         'en': 'Transport · Logistics',
         'de': 'Transport · Logistik',
       }),
-      status: AppStatus.inDevelopment,
+      status: AppStatus.advanced,
       platforms: [AppPlatform.web],
       links: [
         AppLink(
@@ -587,16 +590,24 @@ abstract final class AppProjectsRepository {
       ],
       highlights: [
         LocalizedText({
-          'en': 'Route-based arrival estimation',
-          'de': 'Ankunftsschätzung auf Basis der Route',
+          'en': 'Truck speed per stretch of road, not a car average',
+          'de': 'Lkw-Tempo je Streckenabschnitt statt Pkw-Schnitt',
         }),
         LocalizedText({
-          'en': 'Ferry timetables factored into the ETA',
-          'de': 'Fährfahrpläne fließen in die Ankunftszeit ein',
+          'en': 'Breaks, daily and weekly rests placed along the route',
+          'de': 'Pausen, Tages- und Wochenruhezeiten unterwegs eingeplant',
         }),
         LocalizedText({
-          'en': 'Built around professional drivers\' tour planning',
-          'de': 'Ausgelegt auf die Tourenplanung von Berufsfahrern',
+          'en': 'Ferries planned with their scheduled departure',
+          'de': 'Fähren mit ihrer planmäßigen Abfahrt eingeplant',
+        }),
+        LocalizedText({
+          'en': 'Saved routes for corridors a driver knows better',
+          'de': 'Gespeicherte Routen für Korridore, die der Fahrer besser kennt',
+        }),
+        LocalizedText({
+          'en': 'Map of the route and a tour summary to share',
+          'de': 'Karte der Strecke und Tour-Zusammenfassung zum Teilen',
         }),
       ],
     ),
